@@ -1,0 +1,325 @@
+<main id="contenido" class="overflow-hidden">
+  <section
+    class="mx-auto grid max-w-site gap-12 px-4 pb-18 pt-12 sm:px-6 md:pt-18 lg:grid-cols-[1.04fr_.96fr] lg:items-center lg:px-8 lg:pb-24"
+  >
+    <div>
+      <p
+        class="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-pale px-4 py-2 text-sm font-bold text-primary"
+      >
+        <app-icon name="spark" class="size-5" /> Hecho para la economía argentina
+      </p>
+      <h1
+        class="max-w-2xl font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-ink sm:text-5xl lg:text-6xl"
+      >
+        Hacé números <span class="text-primary">antes de decidir</span>
+      </h1>
+      <p class="mt-6 max-w-xl text-lg leading-8 text-muted">
+        Calculadoras simples y actualizadas para saber cuánto cobrás, cuánto pagás y qué opción te
+        conviene en Argentina.
+      </p>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a
+          href="#calculadoras"
+          class="inline-flex min-h-14 items-center justify-center rounded-full bg-primary px-7 text-sm font-bold text-white shadow-soft transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >Explorar calculadoras</a
+        >
+        <a
+          href="#vista-previa"
+          class="inline-flex min-h-14 items-center justify-center rounded-full border-2 border-primary px-7 text-sm font-bold text-primary transition hover:bg-primary-pale focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >Calcular aumento de alquiler</a
+        >
+      </div>
+      <ul class="mt-8 grid gap-3 text-sm text-muted sm:grid-cols-2">
+        @for (benefit of heroBenefits; track benefit) {
+          <li class="flex items-center gap-2">
+            <span
+              class="flex size-6 items-center justify-center rounded-full bg-primary-pale text-primary"
+              ><app-icon name="check" class="size-4" /></span
+            >{{ benefit }}
+          </li>
+        }
+      </ul>
+    </div>
+
+    <div id="vista-previa" class="relative scroll-mt-28">
+      <div
+        class="absolute -inset-12 -z-10 rounded-full bg-primary/8 blur-3xl"
+        aria-hidden="true"
+      ></div>
+      <article class="overflow-hidden rounded-card border border-border bg-white shadow-medium">
+        <div
+          class="flex items-center justify-between border-b border-border bg-surface-muted px-5 py-4 sm:px-7"
+        >
+          <div class="flex items-center gap-3 font-display font-bold text-ink">
+            <span
+              class="flex size-10 items-center justify-center rounded-full bg-primary-pale text-primary"
+              ><app-icon name="home" /></span
+            >Aumento de alquiler
+          </div>
+          <span class="rounded-full bg-accent-pale px-3 py-1 text-xs font-bold text-accent-ink"
+            >Vista previa</span
+          >
+        </div>
+        <div class="p-5 sm:p-7">
+          <div class="space-y-5" aria-label="Ejemplo de los datos que solicitará la calculadora">
+            <div>
+              <p class="mb-2 text-sm font-bold text-ink">Monto actual del alquiler</p>
+              <div
+                class="flex min-h-14 items-center rounded-xl border border-border bg-white px-4 text-muted"
+              >
+                <span class="mr-2 text-primary">$</span>Ingresá el monto
+              </div>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p class="mb-2 text-sm font-bold text-ink">Índice pactado</p>
+                <div
+                  class="flex min-h-14 items-center justify-between rounded-xl border border-border px-4 text-muted"
+                >
+                  Elegí un índice <app-icon name="chevron" class="size-5 rotate-90" />
+                </div>
+              </div>
+              <div>
+                <p class="mb-2 text-sm font-bold text-ink">Fecha de inicio</p>
+                <div
+                  class="flex min-h-14 items-center justify-between rounded-xl border border-border px-4 text-muted"
+                >
+                  Mes y año <app-icon name="calendar" class="size-5" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="mt-6 rounded-xl border border-dashed border-primary/40 bg-primary-pale p-5 text-center"
+          >
+            <p class="font-display font-bold text-primary">
+              Completá los datos para obtener un resultado
+            </p>
+            <p class="mt-1 text-sm text-muted">La calculadora completa está en preparación.</p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="calculadoras" class="scroll-mt-24 bg-white py-18 lg:py-24">
+    <div class="mx-auto max-w-site px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Herramientas</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          Calculadoras más utilizadas
+        </h2>
+        <p class="mt-4 text-lg text-muted">
+          Empezamos por los números que aparecen todos los meses en la vida cotidiana.
+        </p>
+      </div>
+      <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        @for (calculator of calculators; track calculator.title) {
+          <app-calculator-card [calculator]="calculator" />
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="categorias" class="scroll-mt-24 py-18 lg:py-24">
+    <div class="mx-auto max-w-site px-4 sm:px-6 lg:px-8">
+      <div class="rounded-section bg-surface-muted p-6 sm:p-10">
+        <h2 class="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          Explorá por categoría
+        </h2>
+        <p class="mt-3 text-lg text-muted">Encontrá rápido lo que necesitás calcular.</p>
+        <div class="mt-9 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          @for (category of categories; track category.name) {
+            <article class="rounded-card border border-border/80 bg-white p-5">
+              <h3
+                class="flex items-start gap-3 border-b border-border pb-4 font-display text-lg font-bold text-primary"
+              >
+                <app-icon [name]="category.icon" />{{ category.name }}
+              </h3>
+              <ul class="mt-4 space-y-3">
+                @for (tool of category.tools; track tool) {
+                  <li class="flex items-start gap-2 text-sm leading-5 text-muted">
+                    <app-icon name="chevron" class="mt-0.5 size-4 text-primary" /><span
+                      >{{ tool }} <span class="text-xs text-subtle">· Próximamente</span></span
+                    >
+                  </li>
+                }
+              </ul>
+            </article>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-18 lg:py-24">
+    <div class="mx-auto max-w-site px-4 text-center sm:px-6 lg:px-8">
+      <h2 class="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+        Números claros, sin letra chica
+      </h2>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-muted">
+        Herramientas pensadas para que entiendas la economía diaria de forma simple.
+      </p>
+      <div class="mt-11 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        @for (benefit of benefits; track benefit.title) {
+          <article class="flex flex-col items-center">
+            <span
+              class="flex size-16 items-center justify-center rounded-2xl bg-primary-pale text-primary"
+              ><app-icon [name]="benefit.icon" class="size-8"
+            /></span>
+            <h3 class="mt-5 font-display text-lg font-bold text-ink">{{ benefit.title }}</h3>
+            <p class="mt-2 text-sm leading-6 text-muted">{{ benefit.description }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-18 lg:py-24">
+    <div class="mx-auto grid max-w-site gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+      <div>
+        <p
+          class="inline-flex rounded-full border border-primary/20 bg-primary-pale px-3 py-1 text-sm font-bold text-primary"
+        >
+          Primera herramienta
+        </p>
+        <h2
+          class="mt-5 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl"
+        >
+          Calculá el aumento de tu alquiler en un minuto
+        </h2>
+        <p class="mt-5 text-lg leading-8 text-muted">
+          La futura calculadora te va a ayudar a estimar el nuevo monto según el índice y el período
+          pactados, mostrando la fórmula, las fuentes y la fecha de revisión.
+        </p>
+        <a
+          href="#vista-previa"
+          class="mt-7 inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-primary px-7 text-sm font-bold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >Ver vista previa <app-icon name="arrow" class="size-5"
+        /></a>
+      </div>
+      <div class="rounded-section border border-border bg-white p-6 shadow-medium sm:p-8">
+        <div class="flex items-center justify-between">
+          <span class="font-display text-lg font-bold text-ink">Tu cálculo, explicado</span
+          ><span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+            >En preparación</span
+          >
+        </div>
+        <div class="mt-7 space-y-5">
+          <div class="flex gap-4">
+            <span
+              class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white"
+              >1</span
+            >
+            <div>
+              <h3 class="font-bold text-ink">Datos del contrato</h3>
+              <p class="mt-1 text-sm text-muted">Monto, índice y período de actualización.</p>
+            </div>
+          </div>
+          <div class="ml-5 h-6 border-l-2 border-dashed border-border" aria-hidden="true"></div>
+          <div class="flex gap-4">
+            <span
+              class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white"
+              >2</span
+            >
+            <div>
+              <h3 class="font-bold text-ink">Parámetros vigentes</h3>
+              <p class="mt-1 text-sm text-muted">Fuente y fecha de revisión visibles.</p>
+            </div>
+          </div>
+          <div class="ml-5 h-6 border-l-2 border-dashed border-border" aria-hidden="true"></div>
+          <div class="flex gap-4">
+            <span
+              class="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white"
+              >3</span
+            >
+            <div>
+              <h3 class="font-bold text-ink">Estimación detallada</h3>
+              <p class="mt-1 text-sm text-muted">Resultado orientativo con la fórmula utilizada.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-funciona" class="scroll-mt-24 bg-primary py-18 text-white lg:py-24">
+    <div class="mx-auto max-w-site px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="text-sm font-bold uppercase tracking-widest text-cyan-100">
+          Simple y transparente
+        </p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          ¿Cómo funciona Hacé Números?
+        </h2>
+      </div>
+      <div class="mt-12 grid gap-6 md:grid-cols-3">
+        @for (step of steps; track step.title; let index = $index) {
+          <article class="relative rounded-card bg-white/10 p-7 text-center ring-1 ring-white/20">
+            <span
+              class="mx-auto flex size-16 items-center justify-center rounded-2xl bg-white text-primary"
+              ><app-icon [name]="step.icon" class="size-8"
+            /></span>
+            <span
+              class="absolute left-5 top-5 flex size-7 items-center justify-center rounded-full bg-accent text-xs font-extrabold text-accent-ink"
+              >{{ index + 1 }}</span
+            >
+            <h3 class="mt-5 font-display text-xl font-bold">{{ step.title }}</h3>
+            <p class="mt-3 text-sm leading-6 text-cyan-50">{{ step.description }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="metodologia" class="scroll-mt-24 bg-white py-18 lg:py-24">
+    <div class="mx-auto max-w-site px-4 sm:px-6 lg:px-8">
+      <div
+        class="mx-auto flex max-w-3xl flex-col items-center rounded-section border border-border bg-surface-muted p-7 text-center sm:p-10"
+      >
+        <span
+          class="flex size-14 items-center justify-center rounded-full bg-primary-pale text-primary"
+          ><app-icon name="shield" class="size-7"
+        /></span>
+        <h2 class="mt-5 font-display text-2xl font-bold text-ink sm:text-3xl">
+          Actualización y metodología
+        </h2>
+        <p class="mt-4 text-lg font-semibold text-primary">
+          Última revisión general: agosto de 2026.
+        </p>
+        <p class="mt-3 max-w-2xl leading-7 text-muted">
+          Cada herramienta informará su propia fuente, fecha de vigencia, fecha de actualización y
+          metodología. Los parámetros se revisan cuando cambia la normativa o la fuente
+          correspondiente.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-18 lg:py-24">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Respuestas claras</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          Preguntas frecuentes
+        </h2>
+      </div>
+      <div class="mt-10 space-y-3">
+        @for (faq of faqs; track faq.question) {
+          <details class="group rounded-xl border border-border bg-white shadow-soft">
+            <summary
+              class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 p-5 font-display font-bold text-ink focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary [&::-webkit-details-marker]:hidden"
+            >
+              {{ faq.question }}
+              <app-icon
+                name="chevron"
+                class="size-5 rotate-90 text-primary transition-transform group-open:-rotate-90"
+              />
+            </summary>
+            <p class="px-5 pb-5 leading-7 text-muted">{{ faq.answer }}</p>
+          </details>
+        }
+      </div>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,56 @@
+<header class="sticky top-0 z-50 border-b border-border/60 bg-white/95 backdrop-blur-md">
+  <nav
+    class="mx-auto flex min-h-18 max-w-site items-center justify-between gap-6 px-4 sm:px-6 lg:px-8"
+    aria-label="Navegación principal"
+  >
+    <a
+      routerLink="/"
+      class="font-display text-xl font-extrabold tracking-tight text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+      (click)="closeMenu()"
+    >
+      Hacé Números
+    </a>
+
+    <div class="hidden items-center gap-5 lg:flex">
+      @for (item of navItems; track item.label) {
+        <a
+          [href]="item.href"
+          class="rounded-md px-1 py-2 text-sm font-semibold text-muted transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          {{ item.label }}
+        </a>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="flex size-11 items-center justify-center rounded-full text-primary transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
+      aria-label="Abrir menú de navegación"
+      [attr.aria-expanded]="menuOpen()"
+      aria-controls="mobile-navigation"
+      (click)="toggleMenu()"
+    >
+      <app-icon [name]="menuOpen() ? 'x' : 'menu'" />
+    </button>
+  </nav>
+
+  @if (menuOpen()) {
+    <nav
+      id="mobile-navigation"
+      class="border-t border-border/60 bg-white px-4 py-3 lg:hidden"
+      aria-label="Navegación móvil"
+    >
+      <div class="mx-auto flex max-w-site flex-col">
+        @for (item of navItems; track item.label) {
+          <a
+            [href]="item.href"
+            class="flex min-h-11 items-center rounded-lg px-3 font-semibold text-muted hover:bg-surface-muted hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+            (click)="closeMenu()"
+          >
+            {{ item.label }}
+          </a>
+        }
+      </div>
+    </nav>
+  }
+</header>

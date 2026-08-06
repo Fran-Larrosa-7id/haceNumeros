@@ -1,0 +1,35 @@
+<article
+  class="relative flex h-full flex-col overflow-hidden rounded-card border bg-white p-6 shadow-soft transition duration-200 hover:-translate-y-1 hover:shadow-medium"
+  [class.border-primary]="calculator().featured"
+  [class.border-border]="!calculator().featured"
+>
+  @if (calculator().featured) {
+    <span
+      class="absolute right-0 top-0 rounded-bl-xl bg-primary px-3 py-1.5 text-xs font-bold text-white"
+      >Destacada</span
+    >
+  }
+  <span
+    class="mb-5 flex size-12 items-center justify-center rounded-full bg-primary-pale text-primary"
+  >
+    <app-icon [name]="calculator().icon" />
+  </span>
+  <h3 class="font-display text-xl font-bold text-ink">{{ calculator().title }}</h3>
+  <p class="mt-2 grow text-sm leading-6 text-muted">{{ calculator().description }}</p>
+  <p class="mt-5 text-xs font-bold uppercase tracking-wide text-subtle">
+    {{ calculator().category }}
+  </p>
+  @if (calculator().available) {
+    <a
+      href="#vista-previa"
+      class="mt-4 inline-flex min-h-11 items-center self-start rounded-full bg-surface-muted px-5 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >Ver vista previa</a
+    >
+  } @else {
+    <span
+      class="mt-4 inline-flex min-h-11 items-center self-start rounded-full bg-surface-muted px-5 text-sm font-bold text-muted"
+      aria-label="Herramienta próximamente disponible"
+      >Próximamente</span
+    >
+  }
+</article>
