@@ -5,6 +5,7 @@ import { CalculatorCard, CalculatorSummary } from '../../shared/ui/calculator-ca
 import { Icon, IconName } from '../../shared/ui/icon/icon';
 
 interface Category {
+  readonly id: string;
   readonly name: string;
   readonly icon: IconName;
   readonly tools: readonly string[];
@@ -46,7 +47,7 @@ export class HomePage {
 
   protected readonly calculators: readonly CalculatorSummary[] = [
     {
-      title: 'Aumento de alquiler',
+      title: 'Calculadora de aumento de alquiler',
       description: 'Estimá el nuevo monto según el índice pactado y el período de actualización.',
       category: 'Hogar y movilidad',
       icon: 'home',
@@ -54,7 +55,7 @@ export class HomePage {
       route: '/calculadora-aumento-alquiler',
     },
     {
-      title: 'Sueldo bruto a neto',
+      title: 'Calculadora de sueldo bruto a neto',
       description:
         'Conocé cuánto dinero te quedaría en mano después de las deducciones habituales.',
       category: 'Dinero y trabajo',
@@ -91,21 +92,25 @@ export class HomePage {
 
   protected readonly categories: readonly Category[] = [
     {
+      id: 'dinero-y-trabajo',
       name: 'Dinero y trabajo',
       icon: 'briefcase',
       tools: ['Sueldo bruto a neto', 'Aguinaldo', 'Indemnización por despido', 'Vacaciones'],
     },
     {
+      id: 'impuestos-y-emprendimientos',
       name: 'Impuestos y emprendimientos',
       icon: 'receipt',
       tools: ['Monotributo', 'Ganancias', 'Comisiones de Mercado Libre', 'Costos de importación'],
     },
     {
+      id: 'finanzas-personales',
       name: 'Finanzas personales',
       icon: 'wallet',
       tools: ['Contado versus cuotas', 'Plazo fijo', 'Dólar tarjeta versus MEP'],
     },
     {
+      id: 'hogar-y-movilidad',
       name: 'Hogar y movilidad',
       icon: 'car',
       tools: ['Aumento de alquiler', 'Consumo eléctrico', 'Combustible y costo de viaje'],

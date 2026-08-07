@@ -13,16 +13,18 @@ const indexableUrls = [
 
 try {
   assertDirectory(browserRoot);
-  const home = validatePage('index.html', indexableUrls[0], 'WebSite');
+  const home = validatePage('index.html', indexableUrls[0], 'WebSite', /calculadoras?/i);
   const calculator = validatePage(
     path.join('calculadora-aumento-alquiler', 'index.html'),
     indexableUrls[1],
     'BreadcrumbList',
+    /alquiler/i,
   );
   const salaryCalculator = validatePage(
     path.join('calculadora-sueldo-bruto-neto', 'index.html'),
     indexableUrls[2],
     'BreadcrumbList',
+    /sueldo/i,
   );
 
   for (const file of [
@@ -31,6 +33,7 @@ try {
     'robots.txt',
     '404.html',
     path.join('assets', 'favicon.png'),
+    path.join('assets', 'Sol_de_Mayo_Bandera_Argentina.png'),
     path.join('data', 'rent-indexes', 'icl.json'),
     path.join('data', 'rent-indexes', 'ipc.json'),
     path.join('data', 'rent-indexes', 'casa-propia.json'),
@@ -65,6 +68,12 @@ try {
 
   for (const file of files.filter((entry) => /\.(?:html|xml|txt)$/i.test(entry))) {
     const content = fs.readFileSync(file, 'utf8');
+    if (/<meta\b[^>]*\bname=["']keywords["']/i.test(content)) {
+      throw new Error(`${path.relative(browserRoot, file)} contiene meta keywords.`);
+    }
+    if (/\b(?:seo-keywords|hidden-keywords|keyword-list|data-keywords)\b/i.test(content)) {
+      throw new Error(`${path.relative(browserRoot, file)} contiene una lista SEO oculta.`);
+    }
     if (/fran-larrosa-7id\.github\.io/i.test(content)) {
       throw new Error(`${path.relative(browserRoot, file)} contiene la URL github.io anterior.`);
     }
@@ -79,7 +88,7 @@ try {
   process.exitCode = 1;
 }
 
-function validatePage(relativePath, canonical, structuredType) {
+function validatePage(relativePath, canonical, structuredType, expectedConcept) {
   const filePath = path.join(browserRoot, relativePath);
   assertFile(filePath);
   const html = fs.readFileSync(filePath, 'utf8');
@@ -120,6 +129,13 @@ function validatePage(relativePath, canonical, structuredType) {
   }
   if ((html.match(/<h1\b/gi) ?? []).length !== 1) {
     throw new Error(`${relativePath}: debe contener exactamente un H1.`);
+  }
+  const h1 = /<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(html)?.[1]?.replace(/<[^>]+>/g, ' ');
+  if (!expectedConcept.test(title) || !expectedConcept.test(h1 ?? '')) {
+    throw new Error(`${relativePath}: title y H1 no expresan la intención principal.`);
+  }
+  if (findTag(html, 'meta', { name: 'keywords' })) {
+    throw new Error(`${relativePath}: no debe incluir meta keywords.`);
   }
 
   const jsonLd = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]

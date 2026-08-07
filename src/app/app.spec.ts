@@ -29,7 +29,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(HomePage);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hacé números');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Hacé Números');
   });
 
   it('toggles and persists the color theme from the header', () => {

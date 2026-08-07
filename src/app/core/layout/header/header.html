@@ -6,7 +6,7 @@
     <a
       routerLink="/"
       class="font-display text-xl font-extrabold tracking-tight text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-      (click)="closeMenu()"
+      (click)="navigateHome()"
     >
       Hacé Números
     </a>
@@ -17,6 +17,7 @@
           [routerLink]="['/']"
           [fragment]="item.fragment"
           class="rounded-md px-1 py-2 text-sm font-semibold text-muted transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          (click)="navigateToSection(item.fragment)"
         >
           {{ item.label }}
         </a>
@@ -61,7 +62,7 @@
             [routerLink]="['/']"
             [fragment]="item.fragment"
             class="flex min-h-11 items-center rounded-lg px-3 font-semibold text-muted hover:bg-surface-muted hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
-            (click)="closeMenu()"
+            (click)="navigateToSection(item.fragment)"
           >
             {{ item.label }}
           </a>

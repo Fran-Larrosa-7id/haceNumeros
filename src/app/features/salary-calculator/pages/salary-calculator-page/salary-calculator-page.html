@@ -23,8 +23,8 @@
           Calculadora de sueldo bruto a neto en Argentina
         </h1>
         <p class="mt-4 max-w-3xl text-lg leading-8 text-muted">
-          Estimá cuánto te queda en mano después de los aportes personales o calculá qué bruto
-          necesitás para alcanzar un neto.
+          Calculá tu sueldo en mano desde el bruto o usá el modo neto a bruto para estimar qué
+          sueldo bruto necesitás para alcanzar un neto determinado.
         </p>
       </div>
       <a
@@ -113,10 +113,13 @@
 
     <section class="grid gap-5 md:grid-cols-2">
       <article class="rounded-card border border-border bg-white p-6 shadow-soft">
-        <h2 class="font-display text-2xl font-bold text-ink">¿Qué es el sueldo bruto?</h2>
+        <h2 class="font-display text-2xl font-bold text-ink">
+          ¿Cómo calcular el sueldo neto desde el bruto?
+        </h2>
         <p class="mt-3 leading-7 text-muted">
-          Es la remuneración mensual antes de aplicar aportes personales, impuestos u otros
-          descuentos. Es el punto de partida de la estimación.
+          Ingresá la remuneración mensual antes de descuentos. La calculadora resta los aportes
+          personales sobre la base correspondiente y los otros descuentos informados para estimar
+          cuánto cobrarías en mano.
         </p>
       </article>
       <article class="rounded-card border border-border bg-white p-6 shadow-soft">
@@ -127,14 +130,16 @@
         </p>
       </article>
       <article class="rounded-card border border-border bg-white p-6 shadow-soft">
-        <h2 class="font-display text-2xl font-bold text-ink">Descuentos contemplados</h2>
+        <h2 class="font-display text-2xl font-bold text-ink">
+          ¿Qué descuentos incluye la calculadora?
+        </h2>
         <p class="mt-3 leading-7 text-muted">
           La herramienta aplica 11 % de jubilación, 3 % de obra social y 3 % de INSSJP/PAMI sobre la
           base alcanzada, sin redondeos intermedios.
         </p>
       </article>
       <article class="rounded-card border border-border bg-white p-6 shadow-soft">
-        <h2 class="font-display text-2xl font-bold text-ink">¿Qué pasa con el tope?</h2>
+        <h2 class="font-display text-2xl font-bold text-ink">¿Qué pasa con el tope de aportes?</h2>
         <p class="mt-3 leading-7 text-muted">
           Cuando el bruto supera la base imponible máxima, los aportes alcanzados dejan de crecer
           sobre el excedente. Por eso el descuento efectivo puede ser menor al 17 %.
@@ -148,7 +153,9 @@
         </p>
       </article>
       <article class="rounded-card border border-border bg-white p-6 shadow-soft">
-        <h2 class="font-display text-2xl font-bold text-ink">Bruto para un neto deseado</h2>
+        <h2 class="font-display text-2xl font-bold text-ink">
+          ¿Cómo calcular qué bruto necesito para un neto determinado?
+        </h2>
         <p class="mt-3 leading-7 text-muted">
           El modo inverso calcula el bruto necesario por tramos y reutiliza el mismo desglose.
           También respeta la base máxima; no divide siempre por 0,83.
@@ -225,7 +232,7 @@
         <a
           routerLink="/calculadora-aumento-alquiler"
           class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
-          ><h3 class="font-display font-bold text-ink">Aumento de alquiler</h3>
+          ><h3 class="font-display font-bold text-ink">Calculadora de aumento de alquiler</h3>
           <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
         >
         <div class="rounded-card border border-border bg-white p-5 shadow-soft">

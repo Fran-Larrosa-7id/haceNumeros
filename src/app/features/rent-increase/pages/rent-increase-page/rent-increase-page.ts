@@ -59,7 +59,7 @@ export class RentIncreasePage {
 
   protected readonly relatedTools: readonly RelatedTool[] = [
     {
-      title: 'Sueldo bruto a neto',
+      title: 'Calculadora de sueldo bruto a neto',
       icon: 'money',
       route: '/calculadora-sueldo-bruto-neto',
     },
@@ -70,24 +70,24 @@ export class RentIncreasePage {
 
   protected readonly faqs: readonly Faq[] = [
     {
-      question: '¿Qué índice debo elegir?',
+      question: '¿Cómo sé qué índice usa mi alquiler?',
       answer:
         'Elegí únicamente el índice o porcentaje que aparece expresamente en tu contrato. La herramienta no determina qué régimen legal corresponde a tu caso.',
     },
     {
-      question: '¿Qué fecha tengo que ingresar?',
+      question: '¿Cómo se calcula el aumento por ICL?',
       answer:
-        'Ingresá la fecha del último ajuste y la fecha en la que corresponde el próximo. Ambas deberían surgir del contrato o de la última actualización aplicada.',
+        'La calculadora divide el valor del ICL de la fecha final por el de la fecha inicial y multiplica ese coeficiente por el alquiler actual. Ambas fechas deben tener una observación oficial disponible.',
     },
     {
-      question: '¿Sirve para aumentos trimestrales?',
+      question: '¿Cómo se calcula el aumento por IPC?',
       answer:
-        'Sí, la frecuencia trimestral se puede indicar como referencia. El cálculo por índice utiliza las fechas concretas, mientras que el modo manual aplica el porcentaje pactado.',
+        'Se utilizan los niveles mensuales oficiales del IPC para los períodos elegidos. El valor final se divide por el inicial y el coeficiente resultante se aplica al alquiler.',
     },
     {
-      question: '¿El resultado es oficial?',
+      question: '¿Qué es el coeficiente Casa Propia?',
       answer:
-        'No. Es una estimación orientativa. Puede variar por redondeos, fechas, cláusulas particulares o datos que todavía no estén incorporados.',
+        'Es un coeficiente mensual oficial que combina la menor variación entre CVS y CER. La herramienta acumula los coeficientes correspondientes a todos los meses seleccionados.',
     },
     {
       question: '¿Qué pasa si mi contrato establece un porcentaje fijo?',
@@ -119,9 +119,9 @@ export class RentIncreasePage {
 
   constructor() {
     this.seo.apply({
-      title: 'Calculadora de aumento de alquiler | ICL, IPC y porcentaje',
+      title: 'Calculadora de aumento de alquiler en Argentina | Hacé Números',
       description:
-        'Calculá el aumento de tu alquiler en Argentina según ICL, IPC o el porcentaje indicado en tu contrato. Obtené el nuevo monto y el desglose del cálculo.',
+        'Calculá el aumento de tu alquiler en Argentina con ICL, IPC, Casa Propia o porcentaje manual, usando datos oficiales y un desglose claro.',
       canonicalPath: '/calculadora-aumento-alquiler',
       structuredData: [
         {

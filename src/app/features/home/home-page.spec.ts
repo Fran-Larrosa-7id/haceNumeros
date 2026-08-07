@@ -41,6 +41,18 @@ describe('HomePage SEO', () => {
   it('has one heading and real links to both published calculators', () => {
     const body = document.body;
     expect(body.querySelectorAll('h1').length).toBe(1);
+    expect(body.querySelector('h1')?.textContent).toContain('calculadoras claras');
+    expect(body.textContent).toContain('alquileres, sueldos, impuestos y finanzas personales');
+    expect(
+      body.querySelector<HTMLImageElement>('img[src="assets/Sol_de_Mayo_Bandera_Argentina.png"]'),
+    ).not.toBeNull();
+    for (const categoryId of [
+      'dinero-y-trabajo',
+      'impuestos-y-emprendimientos',
+      'hogar-y-movilidad',
+    ]) {
+      expect(body.querySelector(`#${categoryId}`)).not.toBeNull();
+    }
     expect(
       Array.from(body.querySelectorAll<HTMLAnchorElement>('a')).some(
         (link) => link.getAttribute('href') === '/calculadora-aumento-alquiler',

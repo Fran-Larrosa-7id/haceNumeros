@@ -31,12 +31,12 @@ describe('RentIncreasePage', () => {
   });
 
   it('publishes the calculator canonical metadata and matching breadcrumb data', () => {
-    expect(document.title).toBe('Calculadora de aumento de alquiler | ICL, IPC y porcentaje');
+    expect(document.title).toBe('Calculadora de aumento de alquiler en Argentina | Hacé Números');
     expect(document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href).toBe(
       'https://hacenumeros.com/calculadora-aumento-alquiler',
     );
     expect(document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.content).toBe(
-      'Calculá el aumento de tu alquiler en Argentina según ICL, IPC o el porcentaje indicado en tu contrato. Obtené el nuevo monto y el desglose del cálculo.',
+      'Calculá el aumento de tu alquiler en Argentina con ICL, IPC, Casa Propia o porcentaje manual, usando datos oficiales y un desglose claro.',
     );
     expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.content).toBe(
       'https://hacenumeros.com/calculadora-aumento-alquiler',
@@ -57,6 +57,9 @@ describe('RentIncreasePage', () => {
     ]);
     expect(query<HTMLElement>('nav[aria-label="Migas de pan"]').textContent).not.toContain(
       'Hogar y movilidad',
+    );
+    expect(query<HTMLHeadingElement>('h1').textContent).toContain(
+      'aumento de alquiler en Argentina',
     );
   });
 
@@ -261,9 +264,7 @@ describe('RentIncreasePage', () => {
       schemaVersion: 1,
       type,
       frequency: type === 'icl' ? 'daily' : 'monthly',
-      ...(type === 'casa-propia'
-        ? { calculationMode: 'compound-monthly-coefficients' }
-        : {}),
+      ...(type === 'casa-propia' ? { calculationMode: 'compound-monthly-coefficients' } : {}),
       source: {
         organization: 'Organismo oficial de prueba',
         shortName: 'TEST',

@@ -18,7 +18,7 @@ npm start
 Los datasets oficiales ya generados se validan sin descargarlos ni modificarlos:
 
 ```bash
-npm run data:rent:validate
+npm run data:validate
 ```
 
 La cobertura disponible puede consultarse informativamente —su antigüedad no bloquea CI— con:
@@ -30,7 +30,7 @@ npm run data:rent:status
 Para ejecutar la validación completa de producción:
 
 ```bash
-npm run data:rent:validate
+npm run data:validate
 npm test
 npm run build
 npm run validate:dist
@@ -76,6 +76,18 @@ de publicación es `commit → push a main → GitHub Actions → GitHub Pages`.
 La inspección de URLs y la solicitud de indexación se realizan manualmente desde Search Console; el
 build y GitHub Actions no llaman a Google.
 
+### Revisión SEO mensual
+
+En Search Console, abrir **Rendimiento → Consultas**, filtrar por página y revisar impresiones,
+clics, CTR y posición media. Usar por separado:
+
+- `https://hacenumeros.com/calculadora-aumento-alquiler`
+- `https://hacenumeros.com/calculadora-sueldo-bruto-neto`
+
+Las frases definidas en el contenido son intenciones objetivo, no consultas que ya estén
+posicionando. Hasta que Search Console tenga datos suficientes, no se deben inventar resultados ni
+conclusiones.
+
 ## Checklist al publicar una nueva calculadora
 
 1. Crear la ruta pública en `src/app/app.routes.ts`.
@@ -90,6 +102,6 @@ build y GitHub Actions no llaman a Google.
 10. Publicar mediante un push a `main` y comprobar el deploy de Pages.
 11. Inspeccionar la URL y solicitar indexación manualmente en Search Console.
 
-Con sólo dos páginas indexables, el sitemap continúa deliberadamente estático. Al agregar una nueva
+Con sólo tres páginas indexables, el sitemap continúa deliberadamente estático. Al agregar una nueva
 calculadora deben actualizarse conjuntamente ruta, metadata, enlace interno, sitemap y validador de
 distribución.

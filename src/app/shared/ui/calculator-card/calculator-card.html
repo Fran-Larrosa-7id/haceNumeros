@@ -1,5 +1,5 @@
 <article
-  class="relative flex h-full flex-col overflow-hidden rounded-card border bg-white p-6 shadow-soft transition duration-200 hover:-translate-y-1 hover:shadow-medium"
+  class="group relative flex h-full flex-col overflow-hidden rounded-card border bg-white p-6 shadow-soft transition duration-200 hover:-translate-y-1 hover:shadow-medium"
   [class.border-primary]="calculator().featured"
   [class.border-border]="!calculator().featured"
 >
@@ -22,8 +22,14 @@
   @if (calculator().route; as route) {
     <a
       [routerLink]="route"
-      class="mt-4 inline-flex min-h-11 items-center self-start rounded-full bg-surface-muted px-5 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-      >Calcular ahora</a
+      class="absolute inset-0 z-10 rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      [attr.aria-label]="'Abrir ' + calculator().title"
+      ><span class="sr-only">Abrir {{ calculator().title }}</span></a
+    >
+    <span
+      aria-hidden="true"
+      class="mt-4 inline-flex min-h-11 items-center self-start rounded-full bg-surface-muted px-5 text-sm font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-white"
+      >Abrir calculadora</span
     >
   } @else {
     <span
