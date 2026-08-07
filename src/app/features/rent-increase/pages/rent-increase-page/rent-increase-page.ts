@@ -7,8 +7,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
+import { SeoService } from '../../../../core/seo/seo.service';
 import { Icon, IconName } from '../../../../shared/ui/icon/icon';
 import { RentCalculationResultCard } from '../../components/rent-calculation-result/rent-calculation-result';
 import { RentCalculatorForm } from '../../components/rent-calculator-form/rent-calculator-form';
@@ -44,8 +44,7 @@ interface RelatedTool {
 export class RentIncreasePage {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly repository = inject(RentIndexRepository);
-  private readonly title = inject(Title);
-  private readonly meta = inject(Meta);
+  private readonly seo = inject(SeoService);
 
   protected readonly calculationState = signal<CalculationState>({ status: 'idle' });
   protected readonly copyFeedback = signal<'idle' | 'copied' | 'error'>('idle');
@@ -109,16 +108,32 @@ export class RentIncreasePage {
   });
 
   constructor() {
-    const pageTitle = 'Calculadora de aumento de alquiler | ICL, IPC y porcentaje';
-    const description =
-      'Calculá el aumento de tu alquiler en Argentina según el índice o porcentaje indicado en tu contrato. Obtené el nuevo valor, la diferencia y el desglose del cálculo.';
-
-    this.title.setTitle(pageTitle);
-    this.meta.updateTag({ name: 'description', content: description });
-    this.meta.updateTag({ name: 'robots', content: 'index,follow' });
-    this.meta.updateTag({ property: 'og:title', content: pageTitle });
-    this.meta.updateTag({ property: 'og:description', content: description });
-    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.seo.apply({
+      title: 'Calculadora de aumento de alquiler | ICL, IPC y porcentaje',
+      description:
+        'Calculá el aumento de tu alquiler en Argentina según ICL, IPC o el porcentaje indicado en tu contrato. Obtené el nuevo monto y el desglose del cálculo.',
+      canonicalPath: '/calculadora-aumento-alquiler',
+      structuredData: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Inicio',
+              item: 'https://hacenumeros.com/',
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Calculadora de aumento de alquiler',
+              item: 'https://hacenumeros.com/calculadora-aumento-alquiler',
+            },
+          ],
+        },
+      ],
+    });
 
     afterNextRender(() => void this.loadAvailability());
   }

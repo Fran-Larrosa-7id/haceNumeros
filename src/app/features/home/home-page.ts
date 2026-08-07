@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
+import { SeoService } from '../../core/seo/seo.service';
 import { CalculatorCard, CalculatorSummary } from '../../shared/ui/calculator-card/calculator-card';
 import { Icon, IconName } from '../../shared/ui/icon/icon';
 
@@ -35,8 +35,7 @@ interface Faq {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage {
-  private readonly title = inject(Title);
-  private readonly meta = inject(Meta);
+  private readonly seo = inject(SeoService);
 
   protected readonly heroBenefits: readonly string[] = [
     'Gratis y sin registro',
@@ -187,15 +186,19 @@ export class HomePage {
   ];
 
   constructor() {
-    const pageTitle = 'Hacé Números | Calculadoras para Argentina';
-    const description =
-      'Calculadoras gratuitas y actualizadas para calcular alquileres, sueldos, aguinaldo, Monotributo, cuotas y otros números de la economía argentina.';
-
-    this.title.setTitle(pageTitle);
-    this.meta.updateTag({ name: 'description', content: description });
-    this.meta.updateTag({ name: 'robots', content: 'index,follow' });
-    this.meta.updateTag({ property: 'og:title', content: pageTitle });
-    this.meta.updateTag({ property: 'og:description', content: description });
-    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.seo.apply({
+      title: 'Hacé Números | Calculadoras para Argentina',
+      description:
+        'Calculadoras gratuitas para alquileres, sueldos, aguinaldo, Monotributo, cuotas y otros números de la economía argentina, con fórmulas claras y fuentes verificables.',
+      canonicalPath: '/',
+      structuredData: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Hacé Números',
+          url: 'https://hacenumeros.com/',
+        },
+      ],
+    });
   }
 }

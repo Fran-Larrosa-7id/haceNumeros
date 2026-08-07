@@ -30,6 +30,36 @@ describe('RentIncreasePage', () => {
     expect(result.textContent).not.toContain('615.400');
   });
 
+  it('publishes the calculator canonical metadata and matching breadcrumb data', () => {
+    expect(document.title).toBe('Calculadora de aumento de alquiler | ICL, IPC y porcentaje');
+    expect(document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href).toBe(
+      'https://hacenumeros.com/calculadora-aumento-alquiler',
+    );
+    expect(document.head.querySelector<HTMLMetaElement>('meta[name="description"]')?.content).toBe(
+      'Calculá el aumento de tu alquiler en Argentina según ICL, IPC o el porcentaje indicado en tu contrato. Obtené el nuevo monto y el desglose del cálculo.',
+    );
+    expect(document.head.querySelector<HTMLMetaElement>('meta[property="og:url"]')?.content).toBe(
+      'https://hacenumeros.com/calculadora-aumento-alquiler',
+    );
+
+    const scripts = document.head.querySelectorAll<HTMLScriptElement>(
+      'script[data-seo-structured-data]',
+    );
+    expect(scripts.length).toBe(1);
+    const structuredData = JSON.parse(scripts[0].textContent ?? '') as {
+      readonly '@type': string;
+      readonly itemListElement: readonly { readonly name: string }[];
+    };
+    expect(structuredData['@type']).toBe('BreadcrumbList');
+    expect(structuredData.itemListElement.map((item) => item.name)).toEqual([
+      'Inicio',
+      'Calculadora de aumento de alquiler',
+    ]);
+    expect(query<HTMLElement>('nav[aria-label="Migas de pan"]').textContent).not.toContain(
+      'Hogar y movilidad',
+    );
+  });
+
   it('keeps the manual calculation independent from datasets', () => {
     selectIndex('manual');
     setControlValue('#current-rent', '450.000');
