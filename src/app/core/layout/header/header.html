@@ -14,7 +14,8 @@
     <div class="hidden items-center gap-5 lg:flex">
       @for (item of navItems; track item.label) {
         <a
-          [href]="item.href"
+          [routerLink]="['/']"
+          [fragment]="item.fragment"
           class="rounded-md px-1 py-2 text-sm font-semibold text-muted transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           {{ item.label }}
@@ -43,7 +44,8 @@
       <div class="mx-auto flex max-w-site flex-col">
         @for (item of navItems; track item.label) {
           <a
-            [href]="item.href"
+            [routerLink]="['/']"
+            [fragment]="item.fragment"
             class="flex min-h-11 items-center rounded-lg px-3 font-semibold text-muted hover:bg-surface-muted hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
             (click)="closeMenu()"
           >

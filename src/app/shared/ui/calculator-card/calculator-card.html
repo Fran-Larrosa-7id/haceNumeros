@@ -19,11 +19,11 @@
   <p class="mt-5 text-xs font-bold uppercase tracking-wide text-subtle">
     {{ calculator().category }}
   </p>
-  @if (calculator().available) {
+  @if (calculator().route; as route) {
     <a
-      href="#vista-previa"
+      [routerLink]="route"
       class="mt-4 inline-flex min-h-11 items-center self-start rounded-full bg-surface-muted px-5 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-      >Ver vista previa</a
+      >Calcular ahora</a
     >
   } @else {
     <span

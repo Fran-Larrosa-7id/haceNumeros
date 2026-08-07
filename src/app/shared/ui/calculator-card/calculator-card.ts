@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Icon, IconName } from '../icon/icon';
 
 export interface CalculatorSummary {
@@ -7,12 +8,12 @@ export interface CalculatorSummary {
   readonly category: string;
   readonly icon: IconName;
   readonly featured?: boolean;
-  readonly available?: boolean;
+  readonly route?: string;
 }
 
 @Component({
   selector: 'app-calculator-card',
-  imports: [Icon],
+  imports: [Icon, RouterLink],
   templateUrl: './calculator-card.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

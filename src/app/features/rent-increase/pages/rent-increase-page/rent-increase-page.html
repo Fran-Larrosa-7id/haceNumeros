@@ -1,0 +1,298 @@
+<main id="contenido" class="pb-20">
+  <div class="mx-auto max-w-site px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+    <nav aria-label="Migas de pan" class="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <a
+        routerLink="/"
+        class="rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >Inicio</a
+      >
+      <app-icon name="chevron" class="size-4 text-subtle" />
+      <a
+        routerLink="/"
+        fragment="categorias"
+        class="rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >Hogar y movilidad</a
+      >
+      <app-icon name="chevron" class="size-4 text-subtle" />
+      <span aria-current="page" class="font-semibold text-ink">Aumento de alquiler</span>
+    </nav>
+
+    <div class="mt-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-3xl">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Calculadora gratuita</p>
+        <h1
+          class="mt-3 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl"
+        >
+          Calculadora de aumento de alquiler
+        </h1>
+        <p class="mt-4 max-w-2xl text-lg leading-8 text-muted">
+          Estimá tu próximo alquiler con el índice o porcentaje que figura en el contrato.
+        </p>
+      </div>
+      <div
+        class="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-primary/20 bg-primary-pale px-4 text-sm font-bold text-primary md:self-auto"
+      >
+        <app-icon name="calendar" class="size-5" />Revisión general: agosto de 2026
+      </div>
+    </div>
+  </div>
+
+  <section
+    aria-label="Calculadora y resultado"
+    class="mx-auto grid max-w-site gap-6 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8"
+  >
+    <div class="lg:col-span-7">
+      <app-rent-calculator-form
+        (calculateRequested)="calculate($event)"
+        (invalidSubmitted)="showInvalidState()"
+        (cleared)="clearResult()"
+      />
+    </div>
+    <div class="lg:col-span-5">
+      <app-rent-calculation-result
+        [state]="calculationState()"
+        [copyFeedback]="copyFeedback()"
+        (copyRequested)="copyResult()"
+        (shareRequested)="shareResult()"
+      />
+    </div>
+  </section>
+
+  <div class="mx-auto mt-8 max-w-site px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex min-h-24 items-center justify-center rounded-card border border-dashed border-border bg-surface-muted px-6 text-center text-xs uppercase tracking-widest text-subtle"
+      aria-label="Espacio reservado para publicidad futura"
+    >
+      Espacio publicitario
+    </aside>
+  </div>
+
+  <div class="mx-auto mt-10 max-w-site space-y-10 px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex items-start gap-4 rounded-card border border-primary/20 bg-primary-pale p-5 sm:p-6"
+    >
+      <span
+        class="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-primary"
+        ><app-icon name="info"
+      /></span>
+      <div>
+        <h2 class="font-display text-xl font-bold text-ink">
+          Revisá qué índice figura en tu contrato
+        </h2>
+        <p class="mt-2 leading-7 text-muted">
+          Los contratos pueden establecer diferentes mecanismos de actualización. Seleccioná
+          únicamente el índice o porcentaje que aparece expresamente en tu contrato. Esta
+          herramienta no determina el régimen legal aplicable.
+        </p>
+      </div>
+    </aside>
+
+    @if (successfulResult(); as result) {
+      <section class="rounded-card border border-border bg-white p-5 shadow-soft sm:p-7">
+        <h2 class="font-display text-2xl font-bold text-ink">Desglose del cálculo</h2>
+        <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-xl bg-surface-muted p-4">
+            <dt class="text-sm text-muted">Alquiler actual</dt>
+            <dd class="mt-2 font-display text-xl font-bold text-ink">
+              {{ formatCurrency(result.currentRent) }}
+            </dd>
+          </div>
+          @if (result.method === 'manual') {
+            <div class="rounded-xl bg-surface-muted p-4">
+              <dt class="text-sm text-muted">Porcentaje indicado</dt>
+              <dd class="mt-2 font-display text-xl font-bold text-ink">
+                {{ formatPercentage(result.manualPercentage ?? 0) }}
+              </dd>
+            </div>
+          } @else {
+            <div class="rounded-xl bg-surface-muted p-4">
+              <dt class="text-sm text-muted">Valor inicial del índice</dt>
+              <dd class="mt-2 font-display text-xl font-bold text-ink">
+                {{ result.initialPoint?.value }}
+              </dd>
+            </div>
+            <div class="rounded-xl bg-surface-muted p-4">
+              <dt class="text-sm text-muted">Valor final del índice</dt>
+              <dd class="mt-2 font-display text-xl font-bold text-ink">
+                {{ result.finalPoint?.value }}
+              </dd>
+            </div>
+          }
+          <div class="rounded-xl bg-surface-muted p-4">
+            <dt class="text-sm text-muted">Coeficiente</dt>
+            <dd class="mt-2 font-display text-xl font-bold text-ink">
+              {{ formatCoefficient(result.coefficient) }}
+            </dd>
+          </div>
+          <div class="rounded-xl border border-primary/20 bg-primary-pale p-4 sm:col-span-2">
+            <dt class="text-sm font-bold text-primary">Fórmula aplicada</dt>
+            <dd class="mt-2 leading-7 text-ink">
+              {{ formatCurrency(result.currentRent) }} ×
+              {{ formatCoefficient(result.coefficient) }} =
+              <strong>{{ formatCurrency(result.newRent) }}</strong>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="rounded-card border border-border bg-white p-5 shadow-soft sm:p-7">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 class="font-display text-2xl font-bold text-ink">Comparación visual</h2>
+            <p class="mt-2 text-sm text-muted">
+              La diferencia mensual estimada es
+              {{ formatCurrency(result.monthlyDifference) }}.
+            </p>
+          </div>
+        </div>
+        <div
+          class="mt-8 grid min-h-64 grid-cols-2 items-end gap-5 rounded-xl bg-surface-muted px-5 pb-5 pt-12 sm:gap-10 sm:px-10"
+          aria-hidden="true"
+        >
+          <div class="flex h-48 items-end">
+            <div
+              class="relative w-full rounded-t-xl bg-primary/35"
+              [style.height.%]="comparisonHeight(result.currentRent, result)"
+            >
+              <span
+                class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-bold text-ink"
+                >{{ formatCurrency(result.currentRent) }}</span
+              >
+            </div>
+          </div>
+          <div class="flex h-48 items-end">
+            <div
+              class="relative w-full rounded-t-xl bg-primary"
+              [style.height.%]="comparisonHeight(result.newRent, result)"
+            >
+              <span
+                class="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap text-sm font-bold text-ink"
+                >{{ formatCurrency(result.newRent) }}</span
+              >
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-5 text-center text-sm font-semibold text-muted">
+          <span>Alquiler actual</span><span>Nuevo alquiler</span>
+        </div>
+      </section>
+    }
+
+    <section aria-labelledby="how-title" class="space-y-6">
+      <div class="max-w-3xl">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Información útil</p>
+        <h2 id="how-title" class="mt-3 font-display text-3xl font-bold tracking-tight text-ink">
+          ¿Cómo se calcula el aumento del alquiler?
+        </h2>
+        <p class="mt-4 leading-7 text-muted">
+          El mecanismo depende de lo pactado. Cuando existe un índice con valores disponibles para
+          ambas fechas, el valor final se divide por el inicial para obtener un coeficiente. Ese
+          coeficiente se multiplica por el alquiler actual. Si el contrato fija un porcentaje, se
+          aplica directamente sobre el monto.
+        </p>
+      </div>
+
+      <div class="grid gap-5 md:grid-cols-2">
+        <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+          <h3 class="font-display text-xl font-bold text-ink">Diferencias entre ICL e IPC</h3>
+          <p class="mt-3 leading-7 text-muted">
+            Son índices distintos, con fuentes y periodicidades que pueden variar. La elección no es
+            intercambiable: debe coincidir con lo indicado en el contrato. Esta versión no calcula
+            con ellos hasta contar con datos oficiales incorporados y trazables.
+          </p>
+        </article>
+        <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+          <h3 class="font-display text-xl font-bold text-ink">Frecuencia del ajuste</h3>
+          <p class="mt-3 leading-7 text-muted">
+            Trimestral, cuatrimestral, semestral o anual indica cuándo corresponde revisar el valor.
+            Las fechas concretas siguen siendo esenciales y la frecuencia no modifica
+            arbitrariamente una fórmula basada en fechas.
+          </p>
+        </article>
+        <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+          <h3 class="font-display text-xl font-bold text-ink">Ejemplo matemático</h3>
+          <p class="mt-3 leading-7 text-muted">
+            <strong>Ejemplo, no dato oficial:</strong> para un alquiler de $100.000 y un porcentaje
+            contractual de 10 %, el coeficiente es 1,10 y el nuevo valor estimado es $110.000.
+          </p>
+        </article>
+        <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+          <h3 class="font-display text-xl font-bold text-ink">Metodología y redondeo</h3>
+          <p class="mt-3 leading-7 text-muted">
+            La operación se realiza sin redondeos intermedios. El formato en pesos se aplica al
+            presentar el resultado. La estimación no contempla cláusulas o condiciones particulares
+            que no hayan sido ingresadas.
+          </p>
+        </article>
+      </div>
+
+      <aside
+        class="flex min-h-28 items-center justify-center rounded-card border border-dashed border-border bg-surface-muted px-6 text-center text-xs uppercase tracking-widest text-subtle"
+        aria-label="Espacio reservado para publicidad futura"
+      >
+        Espacio publicitario
+      </aside>
+    </section>
+
+    <section class="rounded-card border border-border bg-white p-6 shadow-soft sm:p-8">
+      <h2 class="font-display text-2xl font-bold text-ink">Fuentes y metodología</h2>
+      <p class="mt-4 leading-7 text-muted">
+        La integración de datos oficiales para ICL, IPC y Casa Propia está pendiente. Por ese
+        motivo, esos modos no muestran fuentes ni resultados hasta que exista un dataset oficial
+        versionado dentro del proyecto.
+      </p>
+      <p class="mt-3 leading-7 text-muted">
+        El modo manual utiliza exclusivamente el monto y el porcentaje ingresados. Podés usarlo
+        cuando tu contrato indique un porcentaje fijo. No se consulta ningún servicio externo ni se
+        almacenan los datos.
+      </p>
+    </section>
+
+    <section class="mx-auto w-full max-w-3xl">
+      <div class="text-center">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Antes de calcular</p>
+        <h2 class="mt-3 font-display text-3xl font-bold tracking-tight text-ink">
+          Preguntas frecuentes
+        </h2>
+      </div>
+      <div class="mt-8 space-y-3">
+        @for (faq of faqs; track faq.question) {
+          <details class="group rounded-xl border border-border bg-white shadow-soft">
+            <summary
+              class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 p-5 font-display font-bold text-ink focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary [&::-webkit-details-marker]:hidden"
+            >
+              {{ faq.question
+              }}<app-icon
+                name="chevron"
+                class="size-5 rotate-90 text-primary transition-transform group-open:-rotate-90"
+              />
+            </summary>
+            <p class="px-5 pb-5 leading-7 text-muted">{{ faq.answer }}</p>
+          </details>
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="font-display text-2xl font-bold text-ink">Herramientas relacionadas</h2>
+      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        @for (tool of relatedTools; track tool.title) {
+          <div class="rounded-card border border-border bg-white p-5 text-center shadow-soft">
+            <span
+              class="mx-auto flex size-12 items-center justify-center rounded-full bg-primary-pale text-primary"
+              ><app-icon [name]="tool.icon"
+            /></span>
+            <h3 class="mt-4 font-display font-bold text-ink">{{ tool.title }}</h3>
+            <p class="mt-2 text-xs font-bold text-primary">Próximamente</p>
+          </div>
+        }
+      </div>
+      <a
+        routerLink="/"
+        fragment="calculadoras"
+        class="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full font-bold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >Ver todas las calculadoras <app-icon name="arrow" class="size-5"
+      /></a>
+    </section>
+  </div>
+</main>

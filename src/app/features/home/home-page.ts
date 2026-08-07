@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
+import { RouterLink } from '@angular/router';
 import { CalculatorCard, CalculatorSummary } from '../../shared/ui/calculator-card/calculator-card';
 import { Icon, IconName } from '../../shared/ui/icon/icon';
 
@@ -28,7 +29,7 @@ interface Faq {
 
 @Component({
   selector: 'app-home-page',
-  imports: [CalculatorCard, Icon],
+  imports: [CalculatorCard, Icon, RouterLink],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,7 +52,7 @@ export class HomePage {
       category: 'Hogar y movilidad',
       icon: 'home',
       featured: true,
-      available: true,
+      route: '/calculadora-aumento-alquiler',
     },
     {
       title: 'Sueldo bruto a neto',

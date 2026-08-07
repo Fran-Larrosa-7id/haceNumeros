@@ -1,0 +1,123 @@
+<aside
+  class="h-full rounded-card border border-primary/20 bg-primary-pale p-5 shadow-soft sm:p-7"
+  aria-labelledby="result-title"
+  aria-live="polite"
+>
+  <h2 id="result-title" class="font-display text-2xl font-bold text-ink">Resultado estimado</h2>
+
+  @if (state(); as currentState) {
+    @switch (currentState.status) {
+      @case ('idle') {
+        <div class="flex min-h-72 flex-col items-center justify-center py-10 text-center">
+          <span
+            class="flex size-16 items-center justify-center rounded-2xl bg-white text-primary shadow-soft"
+            ><app-icon name="calculator" class="size-8"
+          /></span>
+          <p class="mt-5 max-w-sm font-display text-xl font-bold text-ink">
+            Completá los datos para conocer tu próximo alquiler.
+          </p>
+          <p class="mt-3 max-w-sm text-sm leading-6 text-muted">
+            El resultado aparecerá acá junto con el porcentaje, la diferencia y el método utilizado.
+          </p>
+        </div>
+      }
+      @case ('invalid') {
+        <div class="mt-6 rounded-xl border border-red-200 bg-white p-5">
+          <p class="font-display font-bold text-red-800">Hay datos que necesitan revisión</p>
+          <p class="mt-2 text-sm leading-6 text-muted">
+            Revisá los mensajes indicados junto a cada campo y volvé a calcular.
+          </p>
+        </div>
+      }
+      @case ('unavailable') {
+        <div class="mt-6 rounded-xl border border-accent/50 bg-white p-5">
+          <span
+            class="inline-flex rounded-full bg-accent-pale px-3 py-1 text-xs font-bold text-accent-ink"
+            >Datos no disponibles</span
+          >
+          <p class="mt-4 font-display text-xl font-bold text-ink">
+            No pudimos calcular con {{ currentState.indexLabel }}
+          </p>
+          <p class="mt-3 text-sm leading-6 text-muted">{{ currentState.message }}</p>
+          <dl class="mt-5 grid gap-3 border-t border-border pt-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt class="text-subtle">Fecha inicial</dt>
+              <dd class="mt-1 font-bold text-ink">{{ currentState.startDate }}</dd>
+            </div>
+            <div>
+              <dt class="text-subtle">Fecha final</dt>
+              <dd class="mt-1 font-bold text-ink">{{ currentState.endDate }}</dd>
+            </div>
+          </dl>
+          <p class="mt-5 rounded-lg bg-surface-muted p-4 text-sm leading-6 text-muted">
+            Si tu contrato establece un porcentaje fijo, elegí “Porcentaje manual” para calcularlo.
+          </p>
+        </div>
+      }
+      @case ('success') {
+        <div class="mt-6">
+          <p class="text-sm text-muted">Nuevo alquiler mensual aproximado</p>
+          <p
+            class="mt-2 font-display text-4xl font-extrabold tracking-tight text-primary sm:text-5xl"
+          >
+            {{ formatCurrency(currentState.result.newRent) }}
+          </p>
+          <p class="mt-2 text-sm text-muted">
+            Cálculo orientativo mediante {{ currentState.result.methodLabel }}.
+          </p>
+        </div>
+
+        <dl class="mt-7 divide-y divide-border/80 border-y border-border/80">
+          <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-sm text-muted">Aumento acumulado</dt>
+            <dd class="font-bold text-ink">
+              {{ formatPercentage(currentState.result.accumulatedPercentage) }}
+            </dd>
+          </div>
+          <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-sm text-muted">Diferencia mensual</dt>
+            <dd class="font-bold text-ink">
+              {{ formatCurrency(currentState.result.monthlyDifference) }}
+            </dd>
+          </div>
+          <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-sm text-muted">Coeficiente aplicado</dt>
+            <dd class="font-bold text-ink">
+              {{ formatCoefficient(currentState.result.coefficient) }}
+            </dd>
+          </div>
+          <div class="flex items-start justify-between gap-4 py-4">
+            <dt class="text-sm text-muted">Método o fuente</dt>
+            <dd class="max-w-56 text-right text-sm font-bold text-ink">
+              {{ currentState.result.sourceName }}
+            </dd>
+          </div>
+          <div class="flex items-center justify-between gap-4 py-4">
+            <dt class="text-sm text-muted">Actualización</dt>
+            <dd class="font-bold text-ink">{{ updateLabel(currentState.result) }}</dd>
+          </div>
+        </dl>
+
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-white px-4 text-sm font-bold text-primary transition hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            (click)="copyRequested.emit()"
+          >
+            <app-icon name="copy" class="size-5" />{{ copyLabel() }}
+          </button>
+          <button
+            type="button"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-white px-4 text-sm font-bold text-primary transition hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            (click)="shareRequested.emit()"
+          >
+            <app-icon name="share" class="size-5" />Compartir
+          </button>
+        </div>
+        <p class="mt-4 text-xs leading-5 text-subtle">
+          El resultado puede variar según las condiciones particulares del contrato.
+        </p>
+      }
+    }
+  }
+</aside>
