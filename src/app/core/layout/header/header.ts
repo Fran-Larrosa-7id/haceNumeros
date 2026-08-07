@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Icon } from '../../../shared/ui/icon/icon';
+import { ThemeService } from '../../theme/theme.service';
 
 interface NavItem {
   readonly label: string;
@@ -14,6 +15,7 @@ interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Header {
+  protected readonly theme = inject(ThemeService);
   protected readonly menuOpen = signal(false);
   protected readonly navItems: readonly NavItem[] = [
     { label: 'Calculadoras', fragment: 'calculadoras' },
@@ -29,5 +31,9 @@ export class Header {
 
   protected closeMenu(): void {
     this.menuOpen.set(false);
+  }
+
+  protected toggleTheme(): void {
+    this.theme.toggle();
   }
 }

@@ -52,6 +52,52 @@
   }
 }
 
+html[data-theme='dark'] {
+  --color-primary: #46bdd8;
+  --color-primary-hover: #6ed0e5;
+  --color-primary-pale: #12313c;
+  --color-ink: #edf5f7;
+  --color-muted: #b7c5cc;
+  --color-subtle: #91a3ad;
+  --color-border: #354854;
+  --color-canvas: #0b1219;
+  --color-surface-muted: #172530;
+  --color-accent: #e5a744;
+  --color-accent-pale: #3b2d18;
+  --color-accent-ink: #ffd892;
+  --color-red-700: #ff9a9a;
+  --color-red-800: #ffb4b4;
+  --shadow-soft: 0 4px 20px rgb(0 0 0 / 0.22);
+  --shadow-medium: 0 12px 34px rgb(0 0 0 / 0.34);
+}
+
+/* `white` también se usa como texto; sólo convertimos sus superficies en paneles oscuros. */
+html[data-theme='dark'] .bg-white {
+  background-color: #111c25;
+}
+
+html[data-theme='dark'] .bg-white\/95 {
+  background-color: rgb(17 28 37 / 0.95);
+}
+
+html[data-theme='dark'] .bg-red-50 {
+  background-color: #351b20;
+}
+
+html[data-theme='dark'] .bg-primary {
+  background-color: #087d98;
+}
+
+@media (hover: hover) {
+  html[data-theme='dark'] .hover\:bg-primary:hover {
+    background-color: #087d98;
+  }
+
+  html[data-theme='dark'] .hover\:bg-primary-hover:hover {
+    background-color: #0a92ae;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -71,6 +117,7 @@
   --adp-width: 292px;
   --adp-z-index: 200;
   --adp-padding: 8px;
+  --adp-background-color: #ffffff;
   --adp-background-color-hover: var(--color-primary-pale);
   --adp-background-color-active: #ccecf4;
   --adp-color: var(--color-ink);
@@ -95,6 +142,17 @@
   --adp-btn-color-hover: var(--color-primary);
   --adp-btn-background-color-hover: var(--color-primary-pale);
   box-shadow: var(--shadow-medium);
+}
+
+html[data-theme='dark'] .air-datepicker {
+  --adp-background-color: #111c25;
+  --adp-background-color-hover: var(--color-primary-pale);
+  --adp-background-color-active: #1a4250;
+  --adp-border-color-inner: #293c47;
+}
+
+html[data-theme='dark'] .air-datepicker--pointer::after {
+  background: #111c25;
 }
 
 .air-datepicker-nav--title {

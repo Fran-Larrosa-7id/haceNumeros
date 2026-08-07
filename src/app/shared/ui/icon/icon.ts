@@ -15,11 +15,13 @@ export type IconName =
   | 'info'
   | 'menu'
   | 'money'
+  | 'moon'
   | 'receipt'
   | 'shield'
   | 'share'
   | 'shop'
   | 'spark'
+  | 'sun'
   | 'wallet'
   | 'x';
 
@@ -59,6 +61,7 @@ export class Icon {
     info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm0-11v6m0-10h.01',
     menu: 'M4 7h16M4 12h16M4 17h16',
     money: 'M4 6h16v12H4V6Zm8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM7 9h.01M17 15h.01',
+    moon: 'M20.5 14.3A8 8 0 0 1 9.7 3.5 8.5 8.5 0 1 0 20.5 14.3Z',
     receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2V3Zm3 5h6m-6 4h6m-6 4h4',
     shield: 'M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Zm-3-11 2 2 4-4',
     share:
@@ -66,6 +69,7 @@ export class Icon {
     shop: 'M4 10v10h16V10M3 10l2-6h14l2 6M8 20v-6h4v6M3 10c1 2 3 2 4 0 1 2 3 2 5 0 1 2 3 2 5 0 1 2 3 2 4 0',
     spark:
       'm12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3Zm6 12 .7 2.3L21 18l-2.3.7L18 21l-.7-2.3L15 18l2.3-.7L18 15Z',
+    sun: 'M12 4V2m0 20v-2m8-8h2M2 12h2m13.7-5.7 1.4-1.4M4.9 19.1l1.4-1.4m11.4 0 1.4 1.4M4.9 4.9l1.4 1.4M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z',
     wallet:
       'M4 6h15a1 1 0 0 1 1 1v12H4a2 2 0 0 1-2-2V5m0 0a2 2 0 0 1 2-2h13v3H4a2 2 0 0 0-2 2m13 3h5v5h-5a2.5 2.5 0 0 1 0-5Z',
     x: 'M6 6l12 12M18 6 6 18',

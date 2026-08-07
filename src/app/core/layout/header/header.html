@@ -23,16 +23,30 @@
       }
     </div>
 
-    <button
-      type="button"
-      class="flex size-11 items-center justify-center rounded-full text-primary transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
-      aria-label="Abrir menú de navegación"
-      [attr.aria-expanded]="menuOpen()"
-      aria-controls="mobile-navigation"
-      (click)="toggleMenu()"
-    >
-      <app-icon [name]="menuOpen() ? 'x' : 'menu'" />
-    </button>
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        data-theme-toggle
+        class="flex size-11 items-center justify-center rounded-full text-primary transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        [attr.aria-label]="theme.isDark() ? 'Activar modo claro' : 'Activar modo oscuro'"
+        [attr.title]="theme.isDark() ? 'Modo claro' : 'Modo oscuro'"
+        [attr.aria-pressed]="theme.isDark()"
+        (click)="toggleTheme()"
+      >
+        <app-icon [name]="theme.isDark() ? 'sun' : 'moon'" />
+      </button>
+
+      <button
+        type="button"
+        class="flex size-11 items-center justify-center rounded-full text-primary transition-colors hover:bg-surface-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
+        aria-label="Abrir menú de navegación"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="mobile-navigation"
+        (click)="toggleMenu()"
+      >
+        <app-icon [name]="menuOpen() ? 'x' : 'menu'" />
+      </button>
+    </div>
   </nav>
 
   @if (menuOpen()) {

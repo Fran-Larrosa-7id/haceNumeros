@@ -40,18 +40,22 @@
         Disponibilidad de datos
       </p>
       @if (manifest(); as data) {
-        <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-3">
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
+        <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-border">
+          <div class="min-w-0 sm:pr-5">
             <dt class="font-bold text-ink">ICL</dt>
-            <dd class="text-muted">{{ availabilityLabel('icl', data.datasets.icl) }}</dd>
+            <dd class="mt-1 leading-6 text-muted">
+              {{ availabilityLabel('icl', data.datasets.icl) }}
+            </dd>
           </div>
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <div class="min-w-0 sm:px-5">
             <dt class="font-bold text-ink">IPC</dt>
-            <dd class="text-muted">{{ availabilityLabel('ipc', data.datasets.ipc) }}</dd>
+            <dd class="mt-1 leading-6 text-muted">
+              {{ availabilityLabel('ipc', data.datasets.ipc) }}
+            </dd>
           </div>
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <div class="min-w-0 sm:pl-5">
             <dt class="font-bold text-ink">Casa Propia</dt>
-            <dd class="text-muted">
+            <dd class="mt-1 leading-6 text-muted">
               {{ availabilityLabel('casa-propia', data.datasets['casa-propia']) }}
             </dd>
           </div>
@@ -180,9 +184,13 @@
             </summary>
             <ul class="grid gap-2 border-t border-border p-4 sm:grid-cols-2">
               @for (point of result.casaPropiaPeriods; track point.date) {
-                <li class="flex items-center justify-between gap-3 rounded-lg bg-surface-muted p-3 text-sm">
+                <li
+                  class="flex items-center justify-between gap-3 rounded-lg bg-surface-muted p-3 text-sm"
+                >
                   <span class="text-muted">{{ formatMonth(point.date) }}</span>
-                  <strong class="text-ink">{{ formatCoefficient(point.value) }} · {{ point.basis }}</strong>
+                  <strong class="text-ink"
+                    >{{ formatCoefficient(point.value) }} · {{ point.basis }}</strong
+                  >
                 </li>
               }
             </ul>
