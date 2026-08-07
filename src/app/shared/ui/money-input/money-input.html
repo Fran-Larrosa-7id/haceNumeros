@@ -1,0 +1,15 @@
+<input
+  #moneyInput
+  [id]="inputId()"
+  type="text"
+  inputmode="decimal"
+  autocomplete="off"
+  [disabled]="disabled()"
+  [value]="displayValue()"
+  [placeholder]="placeholder()"
+  [attr.aria-invalid]="invalid()"
+  [attr.aria-describedby]="describedBy()"
+  class="min-h-14 w-full rounded-xl border border-border bg-white py-3 pl-8 pr-4 text-ink outline-none transition placeholder:text-subtle focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-surface-muted"
+  (input)="handleInput($event)"
+  (blur)="handleBlur()"
+/>

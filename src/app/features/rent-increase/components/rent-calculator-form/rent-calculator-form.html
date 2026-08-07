@@ -16,19 +16,11 @@
           class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-muted"
           >$</span
         >
-        <input
-          id="current-rent"
-          type="number"
-          inputmode="decimal"
-          min="0.01"
-          step="0.01"
+        <app-money-input
+          inputId="current-rent"
           formControlName="currentRent"
-          placeholder="Ingresá el monto"
-          class="min-h-14 w-full rounded-xl border border-border bg-white py-3 pl-8 pr-4 text-ink outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
-          [attr.aria-invalid]="
-            form.controls.currentRent.touched && form.controls.currentRent.invalid
-          "
-          aria-describedby="current-rent-help current-rent-error"
+          [invalid]="form.controls.currentRent.touched && form.controls.currentRent.invalid"
+          describedBy="current-rent-help current-rent-error"
         />
       </div>
       <p id="current-rent-help" class="mt-2 text-xs text-subtle">

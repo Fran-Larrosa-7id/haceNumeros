@@ -4,6 +4,7 @@ import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Icon } from '../../../../shared/ui/icon/icon';
 import { DatePicker } from '../../../../shared/ui/date-picker/date-picker';
+import { MoneyInput } from '../../../../shared/ui/money-input/money-input';
 import { hasValidDateRange, monthsBetween } from '../../domain/rent-calculation';
 import {
   AdjustmentFrequency,
@@ -19,7 +20,7 @@ interface SelectOption<T extends string> {
 
 @Component({
   selector: 'app-rent-calculator-form',
-  imports: [ReactiveFormsModule, Icon, DatePicker],
+  imports: [ReactiveFormsModule, Icon, DatePicker, MoneyInput],
   templateUrl: './rent-calculator-form.html',
   styleUrl: './rent-calculator-form.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

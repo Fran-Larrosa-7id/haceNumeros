@@ -42,6 +42,27 @@ describe('RentCalculatorForm', () => {
     });
   });
 
+  it.each([
+    ['1000', 1_000],
+    ['10000', 10_000],
+    ['100000', 100_000],
+    ['1000000', 1_000_000],
+    ['123456.78', 123_456.78],
+    ['500.000', 500_000],
+  ])('emits %s with its full monetary magnitude', (rawValue, expected) => {
+    let emitted: RentFormValue | undefined;
+    fixture.componentInstance.calculateRequested.subscribe((value) => (emitted = value));
+
+    setControlValue('#index-type', 'manual', 'change');
+    fixture.detectChanges();
+    setControlValue('#current-rent', rawValue);
+    setControlValue('#manual-percentage', '0');
+    query<HTMLButtonElement>('button[type="submit"]').click();
+
+    expect(emitted?.currentRent).toBe(expected);
+    expect(typeof emitted?.currentRent).toBe('number');
+  });
+
   it('uses monthly controls and labels for IPC', () => {
     setControlValue('#index-type', 'ipc', 'change');
     fixture.detectChanges();

@@ -32,11 +32,11 @@ describe('RentIncreasePage', () => {
 
   it('keeps the manual calculation independent from datasets', () => {
     selectIndex('manual');
-    setControlValue('#current-rent', '100000');
-    setControlValue('#manual-percentage', '10');
+    setControlValue('#current-rent', '450.000');
+    setControlValue('#manual-percentage', '25');
     submit();
 
-    expect(resultCard().textContent).toContain('110.000');
+    expect(resultCard().textContent).toContain('562.500');
   });
 
   it('loads ICL, calculates exact dates and shows the dataset source', async () => {

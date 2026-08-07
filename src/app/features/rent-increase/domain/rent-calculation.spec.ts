@@ -40,6 +40,39 @@ describe('rent calculation', () => {
     expect(result.coefficient).toBe(1.25);
   });
 
+  it('preserves the full rent magnitude in the reported ICL regression', () => {
+    const result = calculateIndexedIncrease({
+      currentRent: 500_000,
+      type: 'icl',
+      initialPoint: { date: '2025-01-01', value: 10_000 },
+      finalPoint: { date: '2026-01-01', value: 13_644 },
+      dataset: testDataset,
+    });
+
+    expect(result.coefficient).toBeCloseTo(1.3644, 8);
+    expect(result.newRent).toBeCloseTo(682_200, 8);
+  });
+
+  it('preserves the full rent magnitude in the second indexed regression', () => {
+    const result = calculateIndexedIncrease({
+      currentRent: 650_000,
+      type: 'icl',
+      initialPoint: { date: '2025-01-01', value: 10_000 },
+      finalPoint: { date: '2026-01-01', value: 13_154 },
+      dataset: testDataset,
+    });
+
+    expect(result.coefficient).toBeCloseTo(1.3154, 8);
+    expect(result.newRent).toBeCloseTo(855_010, 8);
+  });
+
+  it('preserves the full rent magnitude in the manual regression', () => {
+    const result = calculateManualIncrease(450_000, 25);
+
+    expect(result.newRent).toBe(562_500);
+    expect(result.monthlyDifference).toBe(112_500);
+  });
+
   it('supports a zero-percent increase without invalid values', () => {
     const manual = calculateManualIncrease(100_000, 0);
     const indexed = calculateIndexedIncrease({
