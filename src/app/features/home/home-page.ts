@@ -59,6 +59,7 @@ export class HomePage {
         'Conocé cuánto dinero te quedaría en mano después de las deducciones habituales.',
       category: 'Dinero y trabajo',
       icon: 'money',
+      route: '/calculadora-sueldo-bruto-neto',
     },
     {
       title: 'Monotributo',
@@ -184,6 +185,12 @@ export class HomePage {
         'La sección de contacto estará disponible próximamente. Cuando lo esté, vas a poder enviarnos el caso y la fuente para que lo revisemos.',
     },
   ];
+
+  protected categoryToolRoute(tool: string): string | null {
+    if (tool === 'Aumento de alquiler') return '/calculadora-aumento-alquiler';
+    if (tool === 'Sueldo bruto a neto') return '/calculadora-sueldo-bruto-neto';
+    return null;
+  }
 
   constructor() {
     this.seo.apply({

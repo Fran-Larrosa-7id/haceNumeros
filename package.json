@@ -11,6 +11,10 @@
     "data:rent:validate": "node scripts/validate-rent-indexes.mjs",
     "data:rent:status": "node scripts/validate-rent-indexes.mjs --status",
     "data:rent:test": "node --test scripts/*.test.mjs",
+    "data:salary:build": "node scripts/update-salary-parameters.mjs",
+    "data:salary:validate": "node scripts/validate-salary-parameters.mjs",
+    "data:salary:status": "node scripts/validate-salary-parameters.mjs --status",
+    "data:validate": "npm run data:rent:validate && npm run data:salary:validate",
     "validate:dist": "node scripts/validate-dist.mjs",
     "serve:ssr:haceNumeros": "node dist/haceNumeros/server/server.mjs",
     "prod": "ng build --configuration production"

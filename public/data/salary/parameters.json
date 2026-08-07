@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "type": "salary-general-regime",
+  "country": "AR",
+  "effectiveFrom": "2026-08-01",
+  "rates": {
+    "retirement": 0.11,
+    "healthInsurance": 0.03,
+    "inssjp": 0.03
+  },
+  "contributionBase": {
+    "minimum": 141380.42,
+    "maximum": 4594798.23,
+    "minimumAppliedByCalculator": false
+  },
+  "sources": [
+    {
+      "name": "Ley 24.241, artículo 11",
+      "url": "https://www.argentina.gob.ar/normativa/nacional/ley-24241-639/actualizacion"
+    },
+    {
+      "name": "Ley 23.660, artículo 16 inciso b)",
+      "url": "https://www.argentina.gob.ar/normativa/nacional/ley-23660-62/actualizacion"
+    },
+    {
+      "name": "Ley 19.032, artículo 8 inciso d)",
+      "url": "https://www.argentina.gob.ar/normativa/nacional/ley-19032-16081/actualizacion"
+    },
+    {
+      "name": "ARCA — Guía N.º 31: Topes a las bases de aportes",
+      "url": "https://www.arca.gob.ar/LibrodeSueldosDigital/documentos/nuevos/G31-Topes-LSD.pdf"
+    },
+    {
+      "name": "Resolución ANSES 232/2026",
+      "url": "https://www.argentina.gob.ar/normativa/nacional/norma-428341/texto"
+    }
+  ]
+}

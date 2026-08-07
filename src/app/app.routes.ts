@@ -14,6 +14,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'calculadora-sueldo-bruto-neto',
+    loadComponent: () =>
+      import('./features/salary-calculator/pages/salary-calculator-page/salary-calculator-page').then(
+        (component) => component.SalaryCalculatorPage,
+      ),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found-page').then((component) => component.NotFoundPage),

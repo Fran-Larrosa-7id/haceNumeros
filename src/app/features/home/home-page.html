@@ -141,9 +141,16 @@
               <ul class="mt-4 space-y-3">
                 @for (tool of category.tools; track tool) {
                   <li class="flex items-start gap-2 text-sm leading-5 text-muted">
-                    <app-icon name="chevron" class="mt-0.5 size-4 text-primary" /><span
-                      >{{ tool }} <span class="text-xs text-subtle">· Próximamente</span></span
-                    >
+                    <app-icon name="chevron" class="mt-0.5 size-4 text-primary" />
+                    @if (categoryToolRoute(tool); as route) {
+                      <a [routerLink]="route" class="font-semibold text-primary hover:underline"
+                        >{{ tool }} · Disponible</a
+                      >
+                    } @else {
+                      <span
+                        >{{ tool }} <span class="text-xs text-subtle">· Próximamente</span></span
+                      >
+                    }
                   </li>
                 }
               </ul>

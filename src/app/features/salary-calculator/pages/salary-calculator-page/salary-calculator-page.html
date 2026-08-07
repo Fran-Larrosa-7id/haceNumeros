@@ -1,0 +1,238 @@
+<main id="contenido" class="pb-20">
+  <div class="mx-auto max-w-site px-4 pb-9 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+    <nav aria-label="Migas de pan" class="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <a routerLink="/" class="hover:text-primary">Inicio</a
+      ><app-icon name="chevron" class="size-4 text-subtle" /><span
+        aria-current="page"
+        class="font-semibold text-ink"
+        >Calculadora de sueldo bruto a neto</span
+      >
+    </nav>
+    <div class="mt-9 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-4xl">
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+            >Argentina</span
+          ><span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+            >Parámetros versionados</span
+          >
+        </div>
+        <h1
+          class="mt-5 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl"
+        >
+          Calculadora de sueldo bruto a neto en Argentina
+        </h1>
+        <p class="mt-4 max-w-3xl text-lg leading-8 text-muted">
+          Estimá cuánto te queda en mano después de los aportes personales o calculá qué bruto
+          necesitás para alcanzar un neto.
+        </p>
+      </div>
+      <a
+        href="#metodologia"
+        class="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-primary/20 bg-primary-pale px-4 text-sm font-bold text-primary"
+        ><app-icon name="shield" class="size-5" />Fuentes oficiales</a
+      >
+    </div>
+    <aside
+      class="mt-7 rounded-card border border-border bg-white p-4 shadow-soft"
+      aria-live="polite"
+    >
+      <p class="text-xs font-bold uppercase tracking-widest text-primary">
+        Parámetros de la estimación
+      </p>
+      @if (parameters(); as data) {
+        <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-3">
+          <div>
+            <dt class="font-bold text-ink">Vigentes desde</dt>
+            <dd class="mt-1 capitalize text-muted">{{ effectiveDate(data.effectiveFrom) }}</dd>
+          </div>
+          <div>
+            <dt class="font-bold text-ink">Aportes nominales</dt>
+            <dd class="mt-1 text-muted">17 % bajo el tope</dd>
+          </div>
+          <div>
+            <dt class="font-bold text-ink">Base máxima</dt>
+            <dd class="mt-1 text-muted">{{ money(data.contributionBase.maximum) }}</dd>
+          </div>
+        </dl>
+      } @else if (parameterState() === 'error') {
+        <p class="mt-2 text-sm text-muted">
+          No pudimos consultar el resumen. Se reintentará al calcular.
+        </p>
+      } @else {
+        <p class="mt-2 text-sm text-muted">Consultando los parámetros versionados…</p>
+      }
+    </aside>
+  </div>
+
+  <section
+    aria-label="Calculadora y resultado"
+    class="mx-auto grid max-w-site gap-6 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8"
+  >
+    <div class="lg:col-span-7">
+      <app-salary-calculator-form
+        (calculateRequested)="calculate($event)"
+        (invalidSubmitted)="showInvalidState()"
+        (cleared)="clearResult()"
+      />
+    </div>
+    <div class="lg:col-span-5">
+      <app-salary-calculation-result
+        [state]="calculationState()"
+        [copyFeedback]="copyFeedback()"
+        (copyRequested)="copyResult()"
+        (shareRequested)="shareResult()"
+      />
+    </div>
+  </section>
+
+  <div class="mx-auto mt-8 max-w-site px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex min-h-24 items-center justify-center rounded-card border border-dashed border-border bg-surface-muted px-6 text-center text-xs uppercase tracking-widest text-subtle"
+      aria-label="Espacio reservado para publicidad futura"
+    >
+      Espacio publicitario
+    </aside>
+  </div>
+
+  <div class="mx-auto mt-12 max-w-site space-y-10 px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex items-start gap-4 rounded-card border border-primary/20 bg-primary-pale p-5 sm:p-6"
+    >
+      <app-icon name="info" class="mt-1 shrink-0 text-primary" />
+      <div>
+        <h2 class="font-display text-xl font-bold text-ink">
+          Una estimación orientativa, no un recibo de sueldo
+        </h2>
+        <p class="mt-2 leading-7 text-muted">
+          Contempla los aportes personales del régimen general y otros descuentos que ingreses. No
+          calcula Ganancias, convenios, conceptos no remunerativos, SAC ni situaciones especiales.
+        </p>
+      </div>
+    </aside>
+
+    <section class="grid gap-5 md:grid-cols-2">
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Qué es el sueldo bruto?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Es la remuneración mensual antes de aplicar aportes personales, impuestos u otros
+          descuentos. Es el punto de partida de la estimación.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Qué es el sueldo neto?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Es el importe estimado que queda en mano después de restar jubilación, obra social,
+          INSSJP/PAMI y los descuentos manuales informados.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Descuentos contemplados</h2>
+        <p class="mt-3 leading-7 text-muted">
+          La herramienta aplica 11 % de jubilación, 3 % de obra social y 3 % de INSSJP/PAMI sobre la
+          base alcanzada, sin redondeos intermedios.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Qué pasa con el tope?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Cuando el bruto supera la base imponible máxima, los aportes alcanzados dejan de crecer
+          sobre el excedente. Por eso el descuento efectivo puede ser menor al 17 %.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Ejemplo orientativo</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Para un bruto de $2.000.000 sin otros descuentos: jubilación $220.000, obra social $60.000
+          e INSSJP $60.000. Neto estimado: $1.660.000.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Bruto para un neto deseado</h2>
+        <p class="mt-3 leading-7 text-muted">
+          El modo inverso calcula el bruto necesario por tramos y reutiliza el mismo desglose.
+          También respeta la base máxima; no divide siempre por 0,83.
+        </p>
+      </article>
+    </section>
+
+    <section
+      id="metodologia"
+      class="scroll-mt-24 rounded-card border border-border bg-white p-6 shadow-soft sm:p-8"
+    >
+      <h2 class="font-display text-2xl font-bold text-ink">Fuentes y metodología</h2>
+      <p class="mt-4 leading-7 text-muted">
+        Los parámetros se cargan desde un archivo JSON público y versionado. La base de aportes es
+        el menor valor entre el bruto y la base máxima; no se aplica automáticamente la base mínima
+        porque jornadas parciales, días trabajados y otras situaciones requieren más información.
+      </p>
+      @if (parameters(); as data) {
+        <p class="mt-3 leading-7 text-muted">
+          Parámetros vigentes desde
+          <strong class="capitalize text-ink">{{ effectiveDate(data.effectiveFrom) }}</strong
+          >. Base mínima informativa:
+          <strong class="text-ink">{{ money(data.contributionBase.minimum) }}</strong
+          >. Base máxima utilizada:
+          <strong class="text-ink">{{ money(data.contributionBase.maximum) }}</strong
+          >.
+        </p>
+        <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+          @for (source of data.sources; track source.url) {
+            <li>
+              <a
+                [href]="source.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-bold text-primary hover:underline"
+                >{{ source.name }}</a
+              >
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="mt-3 text-sm text-muted">
+          Las fuentes oficiales y su vigencia aparecerán cuando se cargue el dataset.
+        </p>
+      }
+    </section>
+
+    <section class="mx-auto w-full max-w-3xl">
+      <div class="text-center">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Información útil</p>
+        <h2 class="mt-3 font-display text-3xl font-bold text-ink">Preguntas frecuentes</h2>
+      </div>
+      <div class="mt-8 space-y-3">
+        @for (faq of faqs; track faq.question) {
+          <details class="group rounded-xl border border-border bg-white shadow-soft">
+            <summary
+              class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 p-5 font-display font-bold text-ink [&::-webkit-details-marker]:hidden"
+            >
+              {{ faq.question
+              }}<app-icon
+                name="chevron"
+                class="size-5 rotate-90 text-primary transition-transform group-open:-rotate-90"
+              />
+            </summary>
+            <p class="px-5 pb-5 leading-7 text-muted">{{ faq.answer }}</p>
+          </details>
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="font-display text-2xl font-bold text-ink">Herramientas relacionadas</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        <a
+          routerLink="/calculadora-aumento-alquiler"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Aumento de alquiler</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        >
+        <div class="rounded-card border border-border bg-white p-5 shadow-soft">
+          <h3 class="font-display font-bold text-ink">Aguinaldo e indemnización</h3>
+          <p class="mt-2 text-sm text-muted">Próximamente</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

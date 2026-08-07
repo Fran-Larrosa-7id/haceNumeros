@@ -1,0 +1,117 @@
+<div class="space-y-5">
+  <fieldset class="grid grid-cols-2 rounded-2xl bg-white p-1 shadow-soft">
+    <legend class="sr-only">Dirección del cálculo</legend>
+    <button
+      id="mode-gross-to-net"
+      type="button"
+      class="min-h-12 rounded-xl px-3 font-bold transition"
+      [class.bg-primary]="mode() === 'gross-to-net'"
+      [class.text-white]="mode() === 'gross-to-net'"
+      [attr.aria-pressed]="mode() === 'gross-to-net'"
+      (click)="changeMode('gross-to-net')"
+    >
+      Bruto a neto
+    </button>
+    <button
+      id="mode-net-to-gross"
+      type="button"
+      class="min-h-12 rounded-xl px-3 font-bold transition"
+      [class.bg-primary]="mode() === 'net-to-gross'"
+      [class.text-white]="mode() === 'net-to-gross'"
+      [attr.aria-pressed]="mode() === 'net-to-gross'"
+      (click)="changeMode('net-to-gross')"
+    >
+      Neto a bruto
+    </button>
+  </fieldset>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    class="rounded-card border border-border bg-white p-5 shadow-soft sm:p-7"
+    novalidate
+  >
+    <h2 class="font-display text-2xl font-bold text-ink">Datos del sueldo</h2>
+    <div class="mt-5 border-t border-border pt-5">
+      <label for="salary-amount" class="font-bold text-ink">{{ amountLabel() }} ($)</label>
+      <div class="relative mt-2">
+        <span
+          class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 font-bold text-primary"
+          >$</span
+        ><app-money-input
+          inputId="salary-amount"
+          formControlName="amount"
+          [invalid]="hasError('amount')"
+          describedBy="salary-amount-error"
+          placeholder="Ej.: 2.000.000"
+        />
+      </div>
+      @if (hasError('amount')) {
+        <p id="salary-amount-error" class="mt-2 text-sm text-red-700">
+          Ingresá un sueldo mayor a cero.
+        </p>
+      }
+      <p class="mt-2 text-sm text-muted">
+        {{
+          mode() === 'gross-to-net'
+            ? 'Ingresá el total mensual antes de descuentos.'
+            : 'Ingresá cuánto querés recibir en mano.'
+        }}
+      </p>
+    </div>
+
+    <div class="mt-5">
+      <label for="other-discounts" class="font-bold text-ink"
+        >Otros descuentos mensuales ($)
+        <span class="font-normal text-muted">· Opcional</span></label
+      >
+      <div class="relative mt-2">
+        <span
+          class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 font-bold text-primary"
+          >$</span
+        ><app-money-input
+          inputId="other-discounts"
+          formControlName="otherDiscounts"
+          [invalid]="hasError('otherDiscounts')"
+          describedBy="other-discounts-help other-discounts-error"
+          placeholder="Ej.: 100.000"
+        />
+      </div>
+      <p id="other-discounts-help" class="mt-2 text-sm text-muted">
+        Importe fijo, por ejemplo sindicato, cuota o préstamo.
+      </p>
+      @if (hasError('otherDiscounts')) {
+        <p id="other-discounts-error" class="mt-2 text-sm text-red-700">
+          Revisá el importe de otros descuentos.
+        </p>
+      }
+    </div>
+
+    <aside class="mt-6 flex gap-3 rounded-xl border-l-4 border-primary bg-primary-pale p-4">
+      <app-icon name="info" class="mt-0.5 text-primary" />
+      <div>
+        <h3 class="font-bold text-ink">Impuesto a las Ganancias</h3>
+        <p class="mt-1 text-sm leading-6 text-muted">
+          Esta versión no estima la retención de Ganancias. Depende de deducciones, acumulados y tu
+          situación fiscal.
+        </p>
+      </div>
+    </aside>
+
+    <div class="mt-7 grid gap-3 sm:grid-cols-[1fr_auto]">
+      <button
+        type="submit"
+        class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-bold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        <app-icon name="calculator" />{{ actionLabel() }}
+      </button>
+      <button
+        type="button"
+        class="min-h-14 rounded-xl border-2 border-primary px-6 font-bold text-primary hover:bg-primary-pale focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        (click)="reset()"
+      >
+        Limpiar
+      </button>
+    </div>
+  </form>
+</div>

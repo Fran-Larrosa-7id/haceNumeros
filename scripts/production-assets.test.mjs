@@ -21,6 +21,7 @@ test('production domain and crawler assets are coherent', async () => {
   assert.deepEqual(sitemap.match(/<loc>[^<]+<\/loc>/g), [
     '<loc>https://hacenumeros.com/</loc>',
     '<loc>https://hacenumeros.com/calculadora-aumento-alquiler</loc>',
+    '<loc>https://hacenumeros.com/calculadora-sueldo-bruto-neto</loc>',
   ]);
   assert.match(index, /<html lang="es">/);
   assert.match(index, /<base href="\/"\s*\/>/);

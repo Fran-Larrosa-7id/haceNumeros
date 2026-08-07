@@ -25,8 +25,8 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Validate committed rent datasets
-        run: npm run data:rent:validate
+      - name: Validate committed datasets
+        run: npm run data:validate
 
       - name: Run tests
         run: npm test

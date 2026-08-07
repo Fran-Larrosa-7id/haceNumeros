@@ -37,6 +37,7 @@ interface Faq {
 interface RelatedTool {
   readonly title: string;
   readonly icon: IconName;
+  readonly route?: string;
 }
 
 @Component({
@@ -57,7 +58,11 @@ export class RentIncreasePage {
   protected readonly manifestState = signal<'idle' | 'loading' | 'loaded' | 'error'>('idle');
 
   protected readonly relatedTools: readonly RelatedTool[] = [
-    { title: 'Sueldo bruto a neto', icon: 'money' },
+    {
+      title: 'Sueldo bruto a neto',
+      icon: 'money',
+      route: '/calculadora-sueldo-bruto-neto',
+    },
     { title: 'Contado versus cuotas', icon: 'wallet' },
     { title: 'Consumo eléctrico', icon: 'spark' },
     { title: 'Combustible y viajes', icon: 'car' },

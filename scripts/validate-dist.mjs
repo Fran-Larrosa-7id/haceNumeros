@@ -5,7 +5,11 @@ import { fileURLToPath } from 'node:url';
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const browserRoot = path.join(projectRoot, 'dist', 'haceNumeros', 'browser');
 const siteOrigin = 'https://hacenumeros.com';
-const indexableUrls = [`${siteOrigin}/`, `${siteOrigin}/calculadora-aumento-alquiler`];
+const indexableUrls = [
+  `${siteOrigin}/`,
+  `${siteOrigin}/calculadora-aumento-alquiler`,
+  `${siteOrigin}/calculadora-sueldo-bruto-neto`,
+];
 
 try {
   assertDirectory(browserRoot);
@@ -13,6 +17,11 @@ try {
   const calculator = validatePage(
     path.join('calculadora-aumento-alquiler', 'index.html'),
     indexableUrls[1],
+    'BreadcrumbList',
+  );
+  const salaryCalculator = validatePage(
+    path.join('calculadora-sueldo-bruto-neto', 'index.html'),
+    indexableUrls[2],
     'BreadcrumbList',
   );
 
@@ -26,6 +35,7 @@ try {
     path.join('data', 'rent-indexes', 'ipc.json'),
     path.join('data', 'rent-indexes', 'casa-propia.json'),
     path.join('data', 'rent-indexes', 'manifest.json'),
+    path.join('data', 'salary', 'parameters.json'),
   ]) {
     assertFile(path.join(browserRoot, file));
   }
@@ -37,8 +47,11 @@ try {
   validateSitemap();
   validateRobots();
   validateNotFound();
-  validateInternalNavigation(home.html, calculator.html);
-  if (home.title === calculator.title || home.description === calculator.description) {
+  validateInternalNavigation(home.html, calculator.html, salaryCalculator.html);
+  if (
+    new Set([home.title, calculator.title, salaryCalculator.title]).size !== 3 ||
+    new Set([home.description, calculator.description, salaryCalculator.description]).size !== 3
+  ) {
     throw new Error('Home y calculadora deben tener titles y descriptions únicos.');
   }
 
@@ -168,15 +181,27 @@ function validateNotFound() {
   }
 }
 
-function validateInternalNavigation(homeHtml, calculatorHtml) {
+function validateInternalNavigation(homeHtml, calculatorHtml, salaryHtml) {
   if (!findTag(homeHtml, 'a', { href: '/calculadora-aumento-alquiler' })) {
     throw new Error('La home no enlaza internamente a la calculadora publicada.');
+  }
+  if (!findTag(homeHtml, 'a', { href: '/calculadora-sueldo-bruto-neto' })) {
+    throw new Error('La home no enlaza internamente a la calculadora salarial.');
   }
   if (!findTag(calculatorHtml, 'a', { href: '/' })) {
     throw new Error('La calculadora no ofrece navegación interna hacia la home.');
   }
   if (!findTag(calculatorHtml, 'section', { id: 'metodologia' })) {
     throw new Error('La sección enlazada de metodología no existe en la calculadora.');
+  }
+  if (
+    !findTag(salaryHtml, 'a', { href: '/' }) ||
+    !findTag(salaryHtml, 'a', { href: '/calculadora-aumento-alquiler' })
+  ) {
+    throw new Error('La calculadora salarial no contiene la navegaciÃ³n interna esperada.');
+  }
+  if (!findTag(salaryHtml, 'section', { id: 'metodologia' })) {
+    throw new Error('La calculadora salarial no contiene su metodologÃ­a.');
   }
 }
 

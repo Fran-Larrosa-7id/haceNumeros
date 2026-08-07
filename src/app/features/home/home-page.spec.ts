@@ -38,12 +38,17 @@ describe('HomePage SEO', () => {
     });
   });
 
-  it('has one heading and a real link to the rent calculator', () => {
+  it('has one heading and real links to both published calculators', () => {
     const body = document.body;
     expect(body.querySelectorAll('h1').length).toBe(1);
     expect(
       Array.from(body.querySelectorAll<HTMLAnchorElement>('a')).some(
         (link) => link.getAttribute('href') === '/calculadora-aumento-alquiler',
+      ),
+    ).toBe(true);
+    expect(
+      Array.from(body.querySelectorAll<HTMLAnchorElement>('a')).some(
+        (link) => link.getAttribute('href') === '/calculadora-sueldo-bruto-neto',
       ),
     ).toBe(true);
   });

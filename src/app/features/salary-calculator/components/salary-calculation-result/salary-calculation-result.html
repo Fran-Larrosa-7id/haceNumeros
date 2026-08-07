@@ -1,0 +1,150 @@
+<aside
+  class="h-full rounded-card border border-primary/25 bg-primary-pale p-5 shadow-soft sm:p-7"
+  aria-labelledby="salary-result-title"
+  aria-live="polite"
+>
+  <h2 id="salary-result-title" class="font-display text-2xl font-bold text-ink">
+    Resultado estimado
+  </h2>
+  @switch (state().status) {
+    @case ('idle') {
+      <div class="flex min-h-96 flex-col items-center justify-center text-center">
+        <span
+          class="flex size-16 items-center justify-center rounded-2xl bg-white text-primary shadow-soft"
+          ><app-icon name="money" class="size-8"
+        /></span>
+        <p class="mt-5 max-w-sm font-display text-xl font-bold text-ink">
+          Ingresá un sueldo para ver la estimación y el desglose.
+        </p>
+        <p class="mt-3 max-w-sm text-sm leading-6 text-muted">
+          No guardamos los importes ingresados.
+        </p>
+      </div>
+    }
+    @case ('invalid') {
+      <div class="mt-6 rounded-xl border border-red-200 bg-white p-5">
+        <p class="font-bold text-red-800">Hay importes que necesitan revisión</p>
+        <p class="mt-2 text-sm text-muted">Corregí los campos indicados y volvé a calcular.</p>
+      </div>
+    }
+    @case ('loading') {
+      <div class="flex min-h-72 items-center justify-center text-center font-bold text-ink">
+        Cargando parámetros oficiales…
+      </div>
+    }
+    @case ('load-error') {
+      <div class="mt-6 rounded-xl border border-red-200 bg-white p-5">
+        <p class="font-bold text-red-800">No pudimos cargar los parámetros</p>
+        <p class="mt-2 text-sm text-muted">Intentá nuevamente en unos instantes.</p>
+      </div>
+    }
+    @case ('success') {
+      @if (successfulResult(); as result) {
+        <div class="mt-6 text-center">
+          <p class="text-sm font-bold uppercase tracking-wider text-muted">{{ title(result) }}</p>
+          <p
+            class="mt-2 font-display text-4xl font-extrabold tracking-tight text-primary sm:text-5xl"
+          >
+            {{ money(resultAmount(result)) }}
+          </p>
+          <p class="mt-2 text-sm text-muted">Estimación mensual en pesos argentinos</p>
+        </div>
+        <dl class="mt-7 divide-y divide-border/80 border-y border-border/80 text-sm">
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">Sueldo bruto</dt>
+            <dd class="font-bold text-ink">{{ money(result.gross) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">Jubilación (11 %)</dt>
+            <dd class="font-bold text-red-700">− {{ money(result.retirement) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">Obra social (3 %)</dt>
+            <dd class="font-bold text-red-700">− {{ money(result.healthInsurance) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">PAMI / INSSJP (3 %)</dt>
+            <dd class="font-bold text-red-700">− {{ money(result.inssjp) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">Aportes obligatorios</dt>
+            <dd class="font-bold text-ink">{{ money(result.mandatoryContributions) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">Otros descuentos</dt>
+            <dd class="font-bold text-ink">{{ money(result.otherDiscounts) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">
+              Total descuentos · {{ percent(result.effectiveDiscountPercentage) }}
+            </dt>
+            <dd class="font-bold text-ink">{{ money(result.totalDiscounts) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-3">
+            <dt class="text-muted">Base utilizada para aportes</dt>
+            <dd class="font-bold text-ink">{{ money(result.contributionBase) }}</dd>
+          </div>
+        </dl>
+        @if (result.contributionBaseWasCapped) {
+          <p class="mt-4 rounded-xl bg-white p-4 text-sm leading-6 text-muted">
+            <strong class="text-primary">Tope aplicado.</strong> Los aportes se calcularon sobre la
+            base imponible máxima vigente.
+          </p>
+        }
+        @if (result.belowMinimumBase) {
+          <p
+            class="mt-4 rounded-xl border border-accent/40 bg-white p-4 text-sm leading-6 text-muted"
+          >
+            El importe está por debajo de la base mínima general publicada. El cálculo puede variar
+            por jornada, días trabajados u otras condiciones.
+          </p>
+        }
+        <div class="mt-6">
+          <h3 class="font-bold text-ink">Cómo se compone</h3>
+          <div
+            class="mt-3 flex h-5 overflow-hidden rounded-full bg-white"
+            role="img"
+            [attr.aria-label]="
+              'Neto ' +
+              percent(barWidth(result.net, result)) +
+              ', aportes obligatorios ' +
+              percent(barWidth(result.mandatoryContributions, result)) +
+              ', otros descuentos ' +
+              percent(barWidth(result.otherDiscounts, result))
+            "
+          >
+            <span class="bg-primary" [style.width.%]="barWidth(result.net, result)"></span
+            ><span
+              class="bg-red-600"
+              [style.width.%]="barWidth(result.mandatoryContributions, result)"
+            ></span
+            ><span
+              class="bg-accent"
+              [style.width.%]="barWidth(result.otherDiscounts, result)"
+            ></span>
+          </div>
+          <ul class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted">
+            <li><span class="text-primary">●</span> Neto</li>
+            <li><span class="text-red-600">●</span> Aportes</li>
+            <li><span class="text-accent">●</span> Otros</li>
+          </ul>
+        </div>
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            class="min-h-12 rounded-xl border border-primary/30 bg-white px-4 font-bold text-primary"
+            (click)="copyRequested.emit()"
+          >
+            <app-icon name="copy" class="mr-2 size-5" />{{ copyLabel() }}</button
+          ><button
+            type="button"
+            class="min-h-12 rounded-xl border border-primary/30 bg-white px-4 font-bold text-primary"
+            (click)="shareRequested.emit()"
+          >
+            <app-icon name="share" class="mr-2 size-5" />Compartir
+          </button>
+        </div>
+      }
+    }
+  }
+</aside>

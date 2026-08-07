@@ -352,7 +352,15 @@
               ><app-icon [name]="tool.icon"
             /></span>
             <h3 class="mt-4 font-display font-bold text-ink">{{ tool.title }}</h3>
-            <p class="mt-2 text-xs font-bold text-primary">Próximamente</p>
+            @if (tool.route; as route) {
+              <a
+                [routerLink]="route"
+                class="mt-2 inline-flex min-h-8 items-center text-xs font-bold text-primary hover:underline"
+                >Abrir calculadora</a
+              >
+            } @else {
+              <p class="mt-2 text-xs font-bold text-primary">Próximamente</p>
+            }
           </div>
         }
       </div>
