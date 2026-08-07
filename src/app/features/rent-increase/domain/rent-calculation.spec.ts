@@ -8,9 +8,13 @@ import {
 
 const testDataset: RentIndexDataset = {
   type: 'icl',
+  frequency: 'daily',
   sourceName: 'Fixture exclusiva de test',
+  sourceShortName: 'TEST',
+  sourceFile: 'fixture.json',
   effectiveFrom: '2025-01-01',
   updatedAt: '2026-01-01',
+  coverage: { from: '2025-01-01', to: '2026-01-01' },
   values: [],
 };
 

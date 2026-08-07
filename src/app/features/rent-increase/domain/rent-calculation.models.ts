@@ -2,6 +2,8 @@ export type RentIndexType = 'icl' | 'ipc' | 'casa-propia' | 'manual';
 
 export type IndexedRentType = Exclude<RentIndexType, 'manual'>;
 
+export type RentIndexFrequency = 'daily' | 'monthly';
+
 export type AdjustmentFrequency = 'quarterly' | 'four-monthly' | 'semiannual' | 'annual';
 
 export interface RentIndexPoint {
@@ -11,11 +13,35 @@ export interface RentIndexPoint {
 
 export interface RentIndexDataset {
   readonly type: IndexedRentType;
+  readonly frequency: RentIndexFrequency;
   readonly sourceName: string;
+  readonly sourceShortName: string;
+  readonly sourceFile: string;
   readonly sourceUrl?: string;
   readonly effectiveFrom: string;
   readonly updatedAt: string;
+  readonly coverage: {
+    readonly from: string;
+    readonly to: string;
+  };
   readonly values: readonly RentIndexPoint[];
+}
+
+export interface RentIndexManifestEntry {
+  readonly file: string;
+  readonly frequency: RentIndexFrequency;
+  readonly from: string;
+  readonly to: string;
+  readonly rowCount: number;
+}
+
+export interface RentIndexManifest {
+  readonly schemaVersion: 1;
+  readonly generatedAt: string;
+  readonly datasets: {
+    readonly icl: RentIndexManifestEntry;
+    readonly ipc: RentIndexManifestEntry;
+  };
 }
 
 export interface RentFormValue {
@@ -45,6 +71,17 @@ export interface RentCalculationResult {
 export type CalculationState =
   | { readonly status: 'idle' }
   | { readonly status: 'invalid' }
+  | {
+      readonly status: 'loading';
+      readonly indexType: IndexedRentType;
+      readonly indexLabel: string;
+    }
+  | {
+      readonly status: 'load-error';
+      readonly indexType: IndexedRentType;
+      readonly indexLabel: string;
+      readonly message: string;
+    }
   | {
       readonly status: 'unavailable';
       readonly indexType: IndexedRentType;

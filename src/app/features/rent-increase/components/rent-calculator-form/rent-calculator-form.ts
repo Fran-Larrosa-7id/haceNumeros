@@ -82,12 +82,42 @@ export class RentCalculatorForm {
     return this.form.controls.indexType.value === 'manual';
   }
 
+  protected isIpcMode(): boolean {
+    return this.form.controls.indexType.value === 'ipc';
+  }
+
+  protected periodInputType(): 'date' | 'month' {
+    return this.isIpcMode() ? 'month' : 'date';
+  }
+
+  protected startPeriodLabel(): string {
+    return this.isIpcMode() ? 'Mes inicial' : 'Fecha del último ajuste';
+  }
+
+  protected endPeriodLabel(): string {
+    return this.isIpcMode() ? 'Mes final' : 'Fecha del próximo ajuste';
+  }
+
+  protected startPeriodError(): string {
+    return this.isIpcMode() ? 'Elegí el mes inicial.' : 'Elegí la fecha del último ajuste.';
+  }
+
+  protected endPeriodError(): string {
+    return this.isIpcMode() ? 'Elegí el mes final.' : 'Elegí la fecha del próximo ajuste.';
+  }
+
+  protected rangeError(): string {
+    return this.isIpcMode()
+      ? 'El mes final debe ser posterior al mes inicial.'
+      : 'La próxima fecha debe ser posterior al último ajuste.';
+  }
+
   protected indexHelp(): string {
     switch (this.form.controls.indexType.value) {
       case 'icl':
         return 'Elegí ICL solamente si figura expresamente en tu contrato.';
       case 'ipc':
-        return 'Elegí IPC solamente si ese es el mecanismo de ajuste pactado.';
+        return 'El IPC se publica por períodos mensuales. Seleccioná los meses que correspondan a tu contrato.';
       case 'casa-propia':
         return 'La integración de datos de Casa Propia está pendiente.';
       case 'manual':

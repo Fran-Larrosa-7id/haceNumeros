@@ -1,5 +1,12 @@
 import { isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, Component, PLATFORM_ID, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  PLATFORM_ID,
+  afterNextRender,
+  inject,
+  signal,
+} from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { Icon, IconName } from '../../../../shared/ui/icon/icon';
@@ -12,6 +19,9 @@ import {
   IndexedRentType,
   RentCalculationResult,
   RentFormValue,
+  RentIndexDataset,
+  RentIndexManifest,
+  RentIndexManifestEntry,
 } from '../../domain/rent-calculation.models';
 
 interface Faq {
@@ -39,6 +49,8 @@ export class RentIncreasePage {
 
   protected readonly calculationState = signal<CalculationState>({ status: 'idle' });
   protected readonly copyFeedback = signal<'idle' | 'copied' | 'error'>('idle');
+  protected readonly manifest = signal<RentIndexManifest | null>(null);
+  protected readonly manifestState = signal<'idle' | 'loading' | 'loaded' | 'error'>('idle');
 
   protected readonly relatedTools: readonly RelatedTool[] = [
     { title: 'Sueldo bruto a neto', icon: 'money' },
@@ -76,12 +88,12 @@ export class RentIncreasePage {
     {
       question: '¿Por qué no hay datos disponibles para una fecha?',
       answer:
-        'Porque todavía no incorporamos un dataset oficial versionado para ese índice o porque el dataset no contiene exactamente las fechas consultadas. No completamos esos valores con estimaciones.',
+        'Porque el dataset no contiene exactamente la fecha o el período consultado. No buscamos automáticamente otro dato ni completamos valores mediante interpolación.',
     },
     {
       question: '¿Cada cuánto se actualizan los datos?',
       answer:
-        'Cada índice tendrá su propia fecha de actualización. Cuando se incorporen datasets oficiales, la fuente y la revisión utilizada aparecerán junto al resultado.',
+        'La actualización es manual y cada dataset muestra hasta qué fecha o período tiene observaciones. No son datos en tiempo real.',
     },
   ];
 
@@ -107,6 +119,8 @@ export class RentIncreasePage {
     this.meta.updateTag({ property: 'og:title', content: pageTitle });
     this.meta.updateTag({ property: 'og:description', content: description });
     this.meta.updateTag({ property: 'og:type', content: 'website' });
+
+    afterNextRender(() => void this.loadAvailability());
   }
 
   protected calculate(value: RentFormValue): void {
@@ -125,7 +139,7 @@ export class RentIncreasePage {
       return;
     }
 
-    this.calculateWithIndex(value, value.indexType);
+    void this.calculateWithIndex(value, value.indexType);
   }
 
   protected showInvalidState(): void {
@@ -197,13 +211,37 @@ export class RentIncreasePage {
     return this.getSuccessfulResult();
   }
 
-  private calculateWithIndex(value: RentFormValue, type: IndexedRentType): void {
+  protected availabilityLabel(type: 'icl' | 'ipc', entry: RentIndexManifestEntry): string {
+    return type === 'icl'
+      ? `Disponible hasta el ${this.formatDate(entry.to)}`
+      : `Último período: ${this.formatMonth(entry.to)}`;
+  }
+
+  private async calculateWithIndex(value: RentFormValue, type: IndexedRentType): Promise<void> {
     const labels: Readonly<Record<IndexedRentType, string>> = {
       icl: 'ICL',
       ipc: 'IPC',
       'casa-propia': 'Casa Propia',
     };
-    const dataset = this.repository.getDataset(type);
+    this.calculationState.set({
+      status: 'loading',
+      indexType: type,
+      indexLabel: labels[type],
+    });
+
+    let dataset: RentIndexDataset | null;
+    try {
+      dataset = await this.repository.getDataset(type);
+    } catch {
+      this.calculationState.set({
+        status: 'load-error',
+        indexType: type,
+        indexLabel: labels[type],
+        message:
+          'No pudimos cargar el archivo estático del índice. Podés intentar nuevamente o usar el cálculo por porcentaje manual.',
+      });
+      return;
+    }
 
     if (!dataset) {
       this.calculationState.set({
@@ -213,7 +251,7 @@ export class RentIncreasePage {
         startDate: value.lastAdjustmentDate,
         endDate: value.nextAdjustmentDate,
         message:
-          'La integración de datos oficiales para este índice está pendiente. Preferimos no completar el cálculo con coeficientes estimados o valores sin verificar.',
+          'Casa Propia todavía no tiene un dataset validado incorporado. Preferimos no completar el cálculo con coeficientes estimados o valores sin verificar.',
       });
       return;
     }
@@ -228,8 +266,7 @@ export class RentIncreasePage {
         indexLabel: labels[type],
         startDate: value.lastAdjustmentDate,
         endDate: value.nextAdjustmentDate,
-        message:
-          'El dataset incorporado no contiene valores para las dos fechas seleccionadas. No interpolamos ni reemplazamos fechas automáticamente.',
+        message: `No encontramos las dos observaciones seleccionadas. Hay datos disponibles desde ${this.formatCoverage(type, dataset.coverage.from)} hasta ${this.formatCoverage(type, dataset.coverage.to)}. No interpolamos ni reemplazamos períodos automáticamente.`,
       });
       return;
     }
@@ -249,6 +286,34 @@ export class RentIncreasePage {
   private getSuccessfulResult(): RentCalculationResult | null {
     const state = this.calculationState();
     return state.status === 'success' ? state.result : null;
+  }
+
+  private async loadAvailability(): Promise<void> {
+    this.manifestState.set('loading');
+    try {
+      this.manifest.set(await this.repository.getManifest());
+      this.manifestState.set('loaded');
+    } catch {
+      this.manifestState.set('error');
+    }
+  }
+
+  private formatCoverage(type: IndexedRentType, value: string): string {
+    return type === 'ipc' ? this.formatMonth(value) : this.formatDate(value);
+  }
+
+  private formatDate(value: string): string {
+    return new Intl.DateTimeFormat('es-AR', { timeZone: 'UTC' }).format(
+      new Date(`${value}T12:00:00Z`),
+    );
+  }
+
+  private formatMonth(value: string): string {
+    return new Intl.DateTimeFormat('es-AR', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(`${value}-01T12:00:00Z`));
   }
 
   private buildShareText(result: RentCalculationResult): string {

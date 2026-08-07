@@ -32,9 +32,37 @@
       <div
         class="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-primary/20 bg-primary-pale px-4 text-sm font-bold text-primary md:self-auto"
       >
-        <app-icon name="calendar" class="size-5" />Revisión general: agosto de 2026
+        <app-icon name="shield" class="size-5" />Datos oficiales versionados
       </div>
     </div>
+
+    <aside
+      class="mt-7 min-h-20 rounded-card border border-border bg-white p-4 shadow-soft"
+      aria-live="polite"
+      aria-label="Disponibilidad de datos"
+    >
+      <p class="text-xs font-bold uppercase tracking-widest text-primary">
+        Disponibilidad de datos
+      </p>
+      @if (manifest(); as data) {
+        <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <dt class="font-bold text-ink">ICL</dt>
+            <dd class="text-muted">{{ availabilityLabel('icl', data.datasets.icl) }}</dd>
+          </div>
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <dt class="font-bold text-ink">IPC</dt>
+            <dd class="text-muted">{{ availabilityLabel('ipc', data.datasets.ipc) }}</dd>
+          </div>
+        </dl>
+      } @else if (manifestState() === 'error') {
+        <p class="mt-2 text-sm text-muted">
+          No pudimos consultar el resumen de cobertura. Los datos se volverán a cargar al calcular.
+        </p>
+      } @else {
+        <p class="mt-2 text-sm text-muted">Consultando la cobertura de ICL e IPC…</p>
+      }
+    </aside>
   </div>
 
   <section
@@ -196,9 +224,9 @@
         <article class="rounded-card border border-border bg-white p-6 shadow-soft">
           <h3 class="font-display text-xl font-bold text-ink">Diferencias entre ICL e IPC</h3>
           <p class="mt-3 leading-7 text-muted">
-            Son índices distintos, con fuentes y periodicidades que pueden variar. La elección no es
-            intercambiable: debe coincidir con lo indicado en el contrato. Esta versión no calcula
-            con ellos hasta contar con datos oficiales incorporados y trazables.
+            Son índices distintos y no son intercambiables: la elección debe coincidir con el
+            contrato. El ICL se consulta por fecha diaria exacta y el IPC por período mensual
+            exacto, usando los datasets oficiales versionados disponibles en la herramienta.
           </p>
         </article>
         <article class="rounded-card border border-border bg-white p-6 shadow-soft">
@@ -237,14 +265,14 @@
     <section class="rounded-card border border-border bg-white p-6 shadow-soft sm:p-8">
       <h2 class="font-display text-2xl font-bold text-ink">Fuentes y metodología</h2>
       <p class="mt-4 leading-7 text-muted">
-        La integración de datos oficiales para ICL, IPC y Casa Propia está pendiente. Por ese
-        motivo, esos modos no muestran fuentes ni resultados hasta que exista un dataset oficial
-        versionado dentro del proyecto.
+        La calculadora utiliza archivos JSON generados localmente a partir de las fuentes oficiales
+        suministradas. El ICL conserva sus observaciones diarias y el IPC utiliza exclusivamente la
+        serie mensual Nivel general de la región Nacional. No se interpolan fechas ni períodos.
       </p>
       <p class="mt-3 leading-7 text-muted">
-        El modo manual utiliza exclusivamente el monto y el porcentaje ingresados. Podés usarlo
-        cuando tu contrato indique un porcentaje fijo. No se consulta ningún servicio externo ni se
-        almacenan los datos.
+        La fuente que participó del cálculo y el último dato disponible aparecen junto al resultado.
+        Casa Propia continúa sin datos hasta contar con una fuente válida. El modo manual sigue
+        funcionando sin cargar datasets ni almacenar información.
       </p>
     </section>
 

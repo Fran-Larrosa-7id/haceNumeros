@@ -42,6 +42,16 @@ describe('RentCalculatorForm', () => {
     });
   });
 
+  it('uses monthly controls and labels for IPC', () => {
+    setControlValue('#index-type', 'ipc', 'change');
+    fixture.detectChanges();
+
+    expect(query<HTMLInputElement>('#last-adjustment').type).toBe('month');
+    expect(query<HTMLInputElement>('#next-adjustment').type).toBe('month');
+    expect(element.textContent).toContain('Mes inicial');
+    expect(element.textContent).toContain('Mes final');
+  });
+
   it('clears entered values and emits the reset event', () => {
     let cleared = false;
     fixture.componentInstance.cleared.subscribe(() => (cleared = true));

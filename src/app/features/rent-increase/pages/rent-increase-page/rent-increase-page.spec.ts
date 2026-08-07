@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { RentIncreasePage } from './rent-increase-page';
@@ -5,45 +7,129 @@ import { RentIncreasePage } from './rent-increase-page';
 describe('RentIncreasePage', () => {
   let fixture: ComponentFixture<RentIncreasePage>;
   let element: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RentIncreasePage],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
     fixture = TestBed.createComponent(RentIncreasePage);
     element = fixture.nativeElement as HTMLElement;
+    http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    flushManifestIfRequested();
   });
 
+  afterEach(() => http.verify());
+
   it('renders the idle result without a fictitious amount', () => {
-    const result = query<HTMLElement>('aside[aria-labelledby="result-title"]');
+    const result = resultCard();
 
     expect(result.textContent).toContain('Completá los datos');
     expect(result.textContent).not.toContain('615.400');
   });
 
-  it('calculates manually and replaces the result with an unavailable index state', () => {
-    setControlValue('#index-type', 'manual', 'change');
-    fixture.detectChanges();
+  it('keeps the manual calculation independent from datasets', () => {
+    selectIndex('manual');
     setControlValue('#current-rent', '100000');
     setControlValue('#manual-percentage', '10');
-    query<HTMLButtonElement>('button[type="submit"]').click();
-    fixture.detectChanges();
+    submit();
 
-    const result = query<HTMLElement>('aside[aria-labelledby="result-title"]');
-    expect(result.textContent).toContain('110.000');
+    expect(resultCard().textContent).toContain('110.000');
+  });
 
-    setControlValue('#index-type', 'icl', 'change');
-    fixture.detectChanges();
+  it('loads ICL, calculates exact dates and shows the dataset source', async () => {
+    setControlValue('#current-rent', '100000');
     setControlValue('#last-adjustment', '2025-01-01');
     setControlValue('#next-adjustment', '2026-01-01');
+    submit();
+    http.expectOne('/data/rent-indexes/icl.json').flush(
+      datasetFixture('icl', [
+        { date: '2025-01-01', value: 10 },
+        { date: '2026-01-01', value: 15 },
+      ]),
+    );
+    await detectAsyncChanges();
+
+    expect(resultCard().textContent).toContain('150.000');
+    expect(resultCard().textContent).toContain('Organismo oficial de prueba');
+  });
+
+  it('loads IPC using monthly periods and calculates their ratio', async () => {
+    selectIndex('ipc');
+    setControlValue('#current-rent', '100000');
+    setControlValue('#last-adjustment', '2025-01');
+    setControlValue('#next-adjustment', '2026-01');
+    submit();
+    http.expectOne('/data/rent-indexes/ipc.json').flush(
+      datasetFixture('ipc', [
+        { period: '2025-01', value: 100 },
+        { period: '2026-01', value: 125 },
+      ]),
+    );
+    await detectAsyncChanges();
+
+    expect(resultCard().textContent).toContain('125.000');
+    expect(resultCard().textContent).toContain('Organismo oficial de prueba');
+  });
+
+  it('distinguishes a missing ICL date from a dataset load error', async () => {
+    setControlValue('#current-rent', '100000');
+    setControlValue('#last-adjustment', '2025-01-02');
+    setControlValue('#next-adjustment', '2026-01-02');
+    submit();
+    http.expectOne('/data/rent-indexes/icl.json').flush(
+      datasetFixture('icl', [
+        { date: '2025-01-01', value: 10 },
+        { date: '2026-01-01', value: 15 },
+      ]),
+    );
+    await detectAsyncChanges();
+
+    expect(resultCard().textContent).toContain('Datos no disponibles');
+    expect(resultCard().textContent).toContain('No encontramos las dos observaciones');
+  });
+
+  it('shows a technical error when the static dataset cannot load', async () => {
+    selectIndex('ipc');
+    setControlValue('#current-rent', '100000');
+    setControlValue('#last-adjustment', '2025-01');
+    setControlValue('#next-adjustment', '2026-01');
+    submit();
+    http.expectOne('/data/rent-indexes/ipc.json').error(new ProgressEvent('network error'));
+    await detectAsyncChanges();
+
+    expect(resultCard().textContent).toContain('Error de carga');
+  });
+
+  it('keeps Casa Propia unavailable and clear returns to idle', async () => {
+    selectIndex('casa-propia');
+    setControlValue('#current-rent', '100000');
+    setControlValue('#last-adjustment', '2025-01-01');
+    setControlValue('#next-adjustment', '2026-01-01');
+    submit();
+    await detectAsyncChanges();
+    expect(resultCard().textContent).toContain('Datos no disponibles');
+
+    query<HTMLButtonElement>('button[type="button"]').click();
+    fixture.detectChanges();
+    expect(resultCard().textContent).toContain('Completá los datos');
+  });
+
+  function resultCard(): HTMLElement {
+    return query<HTMLElement>('aside[aria-labelledby="result-title"]');
+  }
+
+  function selectIndex(value: string): void {
+    setControlValue('#index-type', value, 'change');
+    fixture.detectChanges();
+  }
+
+  function submit(): void {
     query<HTMLButtonElement>('button[type="submit"]').click();
     fixture.detectChanges();
-
-    expect(result.textContent).toContain('Datos no disponibles');
-    expect(result.textContent).not.toContain('110.000');
-  });
+  }
 
   function query<T extends Element>(selector: string): T {
     const match = element.querySelector<T>(selector);
@@ -57,5 +143,67 @@ describe('RentIncreasePage', () => {
     const control = query<HTMLInputElement | HTMLSelectElement>(selector);
     control.value = value;
     control.dispatchEvent(new Event(eventName));
+  }
+
+  function flushManifestIfRequested(): void {
+    const requests = http.match('/data/rent-indexes/manifest.json');
+    for (const request of requests) {
+      request.flush({
+        schemaVersion: 1,
+        generatedAt: '2026-08-07T00:00:00.000Z',
+        datasets: {
+          icl: {
+            file: 'icl.json',
+            frequency: 'daily',
+            from: '2020-07-01',
+            to: '2026-08-16',
+            rowCount: 2238,
+          },
+          ipc: {
+            file: 'ipc.json',
+            frequency: 'monthly',
+            from: '2016-12',
+            to: '2026-06',
+            rowCount: 115,
+          },
+        },
+      });
+    }
+  }
+
+  async function detectAsyncChanges(): Promise<void> {
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    fixture.detectChanges();
+  }
+
+  function datasetFixture(
+    type: 'icl' | 'ipc',
+    values: readonly (
+      | { readonly date: string; readonly value: number }
+      | { readonly period: string; readonly value: number }
+    )[],
+  ): object {
+    const first = values[0];
+    const last = values.at(-1)!;
+    const key = type === 'icl' ? 'date' : 'period';
+    const from =
+      key === 'date' && 'date' in first ? first.date : 'period' in first ? first.period : '';
+    const to = key === 'date' && 'date' in last ? last.date : 'period' in last ? last.period : '';
+    return {
+      schemaVersion: 1,
+      type,
+      frequency: type === 'icl' ? 'daily' : 'monthly',
+      source: {
+        organization: 'Organismo oficial de prueba',
+        shortName: 'TEST',
+        datasetName: `${type.toUpperCase()} de prueba`,
+        sourceFile: `${type}-fixture`,
+        sourceSha256: 'fixture-hash',
+      },
+      generatedAt: '2026-08-07T00:00:00.000Z',
+      coverage: { from, to },
+      rowCount: values.length,
+      values,
+    };
   }
 });

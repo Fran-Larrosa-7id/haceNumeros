@@ -79,9 +79,11 @@ export function calculateIndexedIncrease(input: IndexedCalculationInput): RentCa
 }
 
 export function hasValidDateRange(startDate: string, endDate: string): boolean {
+  const periodPattern = /^\d{4}-\d{2}(?:-\d{2})?$/;
   return (
-    /^\d{4}-\d{2}-\d{2}$/.test(startDate) &&
-    /^\d{4}-\d{2}-\d{2}$/.test(endDate) &&
+    periodPattern.test(startDate) &&
+    periodPattern.test(endDate) &&
+    startDate.length === endDate.length &&
     startDate < endDate
   );
 }
@@ -91,8 +93,8 @@ export function monthsBetween(startDate: string, endDate: string): number | null
     return null;
   }
 
-  const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
-  const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+  const [startYear, startMonth, startDay = 1] = startDate.split('-').map(Number);
+  const [endYear, endMonth, endDay = 1] = endDate.split('-').map(Number);
   const wholeMonths = (endYear - startYear) * 12 + endMonth - startMonth;
   return wholeMonths + (endDay - startDay) / 31;
 }

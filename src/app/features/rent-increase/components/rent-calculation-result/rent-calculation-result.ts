@@ -42,7 +42,16 @@ export class RentCalculationResultCard {
   }
 
   protected updateLabel(result: RentCalculationResult): string {
-    return result.updatedAt ? this.formatDate(result.updatedAt) : 'No corresponde';
+    if (!result.updatedAt) {
+      return 'No corresponde';
+    }
+    return result.method === 'ipc'
+      ? new Intl.DateTimeFormat('es-AR', {
+          month: 'long',
+          year: 'numeric',
+          timeZone: 'UTC',
+        }).format(new Date(`${result.updatedAt}-01T12:00:00Z`))
+      : this.formatDate(result.updatedAt);
   }
 
   protected copyLabel(): string {

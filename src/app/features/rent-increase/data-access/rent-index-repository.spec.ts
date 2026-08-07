@@ -1,25 +1,96 @@
-import { describe, expect, it } from 'vitest';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { RentIndexDataset } from '../domain/rent-calculation.models';
 import { RentIndexRepository } from './rent-index-repository';
 
 describe('RentIndexRepository', () => {
-  const repository = new RentIndexRepository();
+  let repository: RentIndexRepository;
+  let http: HttpTestingController;
 
-  it('reports that production datasets are not available yet', () => {
-    expect(repository.getDataset('icl')).toBeNull();
-    expect(repository.getDataset('ipc')).toBeNull();
-    expect(repository.getDataset('casa-propia')).toBeNull();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    repository = TestBed.inject(RentIndexRepository);
+    http = TestBed.inject(HttpTestingController);
   });
 
-  it('returns null when a test dataset has no point for a date', () => {
+  afterEach(() => http.verify());
+
+  it('loads ICL once, maps its metadata and caches it in memory', async () => {
+    const first = repository.getDataset('icl');
+    const second = repository.getDataset('icl');
+    expect(first).toBe(second);
+
+    http.expectOne('/data/rent-indexes/icl.json').flush({
+      schemaVersion: 1,
+      type: 'icl',
+      frequency: 'daily',
+      source: {
+        organization: 'Organismo de prueba',
+        shortName: 'TEST',
+        datasetName: 'ICL de prueba',
+        sourceFile: 'icl-fixture.xls',
+        sourceSha256: 'fixture-hash',
+      },
+      generatedAt: '2026-01-02T00:00:00.000Z',
+      coverage: { from: '2025-01-01', to: '2026-01-01' },
+      rowCount: 2,
+      values: [
+        { date: '2025-01-01', value: 10 },
+        { date: '2026-01-01', value: 15 },
+      ],
+    });
+
+    const dataset = await first;
+    expect(dataset?.sourceName).toBe('Organismo de prueba');
+    expect(repository.findPoint(dataset as RentIndexDataset, '2026-01-01')?.value).toBe(15);
+  });
+
+  it('maps IPC monthly periods to domain lookup keys', async () => {
+    const request = repository.getDataset('ipc');
+    http.expectOne('/data/rent-indexes/ipc.json').flush({
+      schemaVersion: 1,
+      type: 'ipc',
+      frequency: 'monthly',
+      source: {
+        organization: 'Organismo de prueba',
+        shortName: 'TEST',
+        datasetName: 'IPC de prueba',
+        sourceFile: 'ipc-fixture.csv',
+        sourceSha256: 'fixture-hash',
+      },
+      generatedAt: '2026-01-02T00:00:00.000Z',
+      coverage: { from: '2025-01', to: '2026-01' },
+      rowCount: 2,
+      values: [
+        { period: '2025-01', value: 100 },
+        { period: '2026-01', value: 125 },
+      ],
+    });
+
+    const dataset = await request;
+    expect(repository.findPoint(dataset as RentIndexDataset, '2026-01')?.value).toBe(125);
+  });
+
+  it('keeps Casa Propia unavailable without issuing a request', async () => {
+    await expect(repository.getDataset('casa-propia')).resolves.toBeNull();
+  });
+
+  it('distinguishes a loaded dataset from a missing point', async () => {
     const fixture: RentIndexDataset = {
       type: 'ipc',
+      frequency: 'monthly',
       sourceName: 'Fixture exclusiva de test',
-      effectiveFrom: '2025-01-01',
-      updatedAt: '2025-02-01',
-      values: [{ date: '2025-01-01', value: 100 }],
+      sourceShortName: 'TEST',
+      sourceFile: 'fixture.json',
+      effectiveFrom: '2025-01',
+      updatedAt: '2025-02',
+      coverage: { from: '2025-01', to: '2025-02' },
+      values: [{ date: '2025-01', value: 100 }],
     };
 
-    expect(repository.findPoint(fixture, '2025-02-01')).toBeNull();
+    expect(repository.findPoint(fixture, '2025-02')).toBeNull();
   });
 });

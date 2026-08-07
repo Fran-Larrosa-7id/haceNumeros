@@ -104,12 +104,12 @@
     } @else {
       <div class="grid gap-5 sm:grid-cols-2">
         <div>
-          <label for="last-adjustment" class="mb-2 block text-sm font-bold text-ink"
-            >Fecha del último ajuste</label
-          >
+          <label for="last-adjustment" class="mb-2 block text-sm font-bold text-ink">{{
+            startPeriodLabel()
+          }}</label>
           <input
             id="last-adjustment"
-            type="date"
+            [type]="periodInputType()"
             formControlName="lastAdjustmentDate"
             class="min-h-14 w-full rounded-xl border border-border bg-white px-4 text-ink outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
             [attr.aria-invalid]="
@@ -119,19 +119,17 @@
           />
           <div id="last-adjustment-error" aria-live="polite">
             @if (hasError('lastAdjustmentDate', 'required')) {
-              <p class="mt-2 text-sm font-semibold text-red-700">
-                Elegí la fecha del último ajuste.
-              </p>
+              <p class="mt-2 text-sm font-semibold text-red-700">{{ startPeriodError() }}</p>
             }
           </div>
         </div>
         <div>
-          <label for="next-adjustment" class="mb-2 block text-sm font-bold text-ink"
-            >Fecha del próximo ajuste</label
-          >
+          <label for="next-adjustment" class="mb-2 block text-sm font-bold text-ink">{{
+            endPeriodLabel()
+          }}</label>
           <input
             id="next-adjustment"
-            type="date"
+            [type]="periodInputType()"
             formControlName="nextAdjustmentDate"
             class="min-h-14 w-full rounded-xl border border-border bg-white px-4 text-ink outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
             [attr.aria-invalid]="
@@ -141,13 +139,9 @@
           />
           <div id="next-adjustment-error" aria-live="polite">
             @if (hasError('nextAdjustmentDate', 'required')) {
-              <p class="mt-2 text-sm font-semibold text-red-700">
-                Elegí la fecha del próximo ajuste.
-              </p>
+              <p class="mt-2 text-sm font-semibold text-red-700">{{ endPeriodError() }}</p>
             } @else if (hasError('nextAdjustmentDate', 'dateRange')) {
-              <p class="mt-2 text-sm font-semibold text-red-700">
-                La próxima fecha debe ser posterior al último ajuste.
-              </p>
+              <p class="mt-2 text-sm font-semibold text-red-700">{{ rangeError() }}</p>
             }
           </div>
         </div>
