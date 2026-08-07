@@ -46,8 +46,8 @@ describe('RentCalculatorForm', () => {
     setControlValue('#index-type', 'ipc', 'change');
     fixture.detectChanges();
 
-    expect(query<HTMLInputElement>('#last-adjustment').type).toBe('month');
-    expect(query<HTMLInputElement>('#next-adjustment').type).toBe('month');
+    expect(query<HTMLInputElement>('#last-adjustment').dataset['pickerMode']).toBe('month');
+    expect(query<HTMLInputElement>('#next-adjustment').dataset['pickerMode']).toBe('month');
     expect(element.textContent).toContain('Mes inicial');
     expect(element.textContent).toContain('Mes final');
   });

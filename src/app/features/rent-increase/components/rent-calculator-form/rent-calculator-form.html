@@ -107,15 +107,14 @@
           <label for="last-adjustment" class="mb-2 block text-sm font-bold text-ink">{{
             startPeriodLabel()
           }}</label>
-          <input
-            id="last-adjustment"
-            [type]="periodInputType()"
+          <app-date-picker
+            inputId="last-adjustment"
+            [mode]="isIpcMode() ? 'month' : 'day'"
             formControlName="lastAdjustmentDate"
-            class="min-h-14 w-full rounded-xl border border-border bg-white px-4 text-ink outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
-            [attr.aria-invalid]="
+            [invalid]="
               form.controls.lastAdjustmentDate.touched && form.controls.lastAdjustmentDate.invalid
             "
-            aria-describedby="last-adjustment-error"
+            describedBy="last-adjustment-error"
           />
           <div id="last-adjustment-error" aria-live="polite">
             @if (hasError('lastAdjustmentDate', 'required')) {
@@ -127,15 +126,14 @@
           <label for="next-adjustment" class="mb-2 block text-sm font-bold text-ink">{{
             endPeriodLabel()
           }}</label>
-          <input
-            id="next-adjustment"
-            [type]="periodInputType()"
+          <app-date-picker
+            inputId="next-adjustment"
+            [mode]="isIpcMode() ? 'month' : 'day'"
             formControlName="nextAdjustmentDate"
-            class="min-h-14 w-full rounded-xl border border-border bg-white px-4 text-ink outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
-            [attr.aria-invalid]="
+            [invalid]="
               form.controls.nextAdjustmentDate.touched && form.controls.nextAdjustmentDate.invalid
             "
-            aria-describedby="next-adjustment-error"
+            describedBy="next-adjustment-error"
           />
           <div id="next-adjustment-error" aria-live="polite">
             @if (hasError('nextAdjustmentDate', 'required')) {

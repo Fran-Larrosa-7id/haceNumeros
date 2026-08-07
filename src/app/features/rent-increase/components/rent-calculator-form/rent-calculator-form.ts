@@ -3,6 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { merge } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Icon } from '../../../../shared/ui/icon/icon';
+import { DatePicker } from '../../../../shared/ui/date-picker/date-picker';
 import { hasValidDateRange, monthsBetween } from '../../domain/rent-calculation';
 import {
   AdjustmentFrequency,
@@ -18,13 +19,14 @@ interface SelectOption<T extends string> {
 
 @Component({
   selector: 'app-rent-calculator-form',
-  imports: [ReactiveFormsModule, Icon],
+  imports: [ReactiveFormsModule, Icon, DatePicker],
   templateUrl: './rent-calculator-form.html',
   styleUrl: './rent-calculator-form.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RentCalculatorForm {
   private readonly destroyRef = inject(DestroyRef);
+  private usesMonthlyPeriods = false;
 
   readonly calculateRequested = output<RentFormValue>();
   readonly invalidSubmitted = output<void>();
@@ -84,10 +86,6 @@ export class RentCalculatorForm {
 
   protected isIpcMode(): boolean {
     return this.form.controls.indexType.value === 'ipc';
-  }
-
-  protected periodInputType(): 'date' | 'month' {
-    return this.isIpcMode() ? 'month' : 'date';
   }
 
   protected startPeriodLabel(): string {
@@ -193,11 +191,19 @@ export class RentCalculatorForm {
   }
 
   private configureMode(type: RentIndexType): void {
+    const switchesPeriodType = this.usesMonthlyPeriods !== (type === 'ipc');
+    this.usesMonthlyPeriods = type === 'ipc';
     const manualControl = this.form.controls.manualPercentage;
     const dateControls = [
       this.form.controls.lastAdjustmentDate,
       this.form.controls.nextAdjustmentDate,
     ];
+
+    if (switchesPeriodType) {
+      for (const control of dateControls) {
+        control.reset('', { emitEvent: false });
+      }
+    }
 
     if (type === 'manual') {
       manualControl.setValidators([Validators.required, Validators.min(0), Validators.max(1_000)]);

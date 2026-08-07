@@ -1,0 +1,21 @@
+<div class="relative">
+  <input
+    #pickerInput
+    [id]="inputId()"
+    type="text"
+    inputmode="none"
+    readonly
+    [disabled]="disabled()"
+    [value]="displayValue()"
+    [attr.data-picker-mode]="mode()"
+    [attr.aria-invalid]="invalid()"
+    [attr.aria-describedby]="describedBy()"
+    [placeholder]="mode() === 'month' ? 'Elegí un mes' : 'Elegí una fecha'"
+    (input)="acceptNormalizedValue($event)"
+    class="min-h-14 w-full cursor-pointer rounded-xl border border-border bg-white py-3 pl-4 pr-12 text-ink outline-none transition placeholder:text-subtle focus:border-primary focus:ring-4 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-surface-muted"
+  />
+  <app-icon
+    name="calendar"
+    class="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-primary"
+  />
+</div>
