@@ -4,13 +4,15 @@ import { fileURLToPath } from 'node:url';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const browserRoot = path.join(projectRoot, 'dist', 'haceNumeros', 'browser');
+const siteOrigin = 'https://hacenumeros.com';
+const indexableUrls = [`${siteOrigin}/`, `${siteOrigin}/calculadora-aumento-alquiler`];
 
 try {
   assertDirectory(browserRoot);
-  validatePage('index.html', 'https://hacenumeros.com/', 'WebSite');
-  validatePage(
+  const home = validatePage('index.html', indexableUrls[0], 'WebSite');
+  const calculator = validatePage(
     path.join('calculadora-aumento-alquiler', 'index.html'),
-    'https://hacenumeros.com/calculadora-aumento-alquiler',
+    indexableUrls[1],
     'BreadcrumbList',
   );
 
@@ -30,6 +32,14 @@ try {
 
   if (fs.readFileSync(path.join(browserRoot, 'CNAME'), 'utf8').trim() !== 'hacenumeros.com') {
     throw new Error('CNAME no contiene hacenumeros.com.');
+  }
+
+  validateSitemap();
+  validateRobots();
+  validateNotFound();
+  validateInternalNavigation(home.html, calculator.html);
+  if (home.title === calculator.title || home.description === calculator.description) {
+    throw new Error('Home y calculadora deben tener titles y descriptions únicos.');
   }
 
   const files = walk(browserRoot);
@@ -60,7 +70,8 @@ function validatePage(relativePath, canonical, structuredType) {
   const filePath = path.join(browserRoot, relativePath);
   assertFile(filePath);
   const html = fs.readFileSync(filePath, 'utf8');
-  if (!/<title>[^<]+<\/title>/i.test(html)) {
+  const title = /<title>([^<]+)<\/title>/i.exec(html)?.[1]?.trim();
+  if (!title) {
     throw new Error(`${relativePath}: falta title.`);
   }
   const description = findTag(html, 'meta', { name: 'description' });
@@ -75,12 +86,97 @@ function validatePage(relativePath, canonical, structuredType) {
   if (canonicalTag?.href !== canonical) {
     throw new Error(`${relativePath}: canonical incorrecto.`);
   }
+  const favicon = findTag(html, 'link', { rel: 'icon' });
+  if (favicon?.href !== 'assets/favicon.png') {
+    throw new Error(`${relativePath}: referencia de favicon incorrecta.`);
+  }
+
+  for (const property of ['og:title', 'og:description', 'og:url', 'og:type']) {
+    const tag = findTag(html, 'meta', { property });
+    if (!tag?.content?.trim()) {
+      throw new Error(`${relativePath}: falta ${property}.`);
+    }
+  }
+  if (findTag(html, 'meta', { property: 'og:url' })?.content !== canonical) {
+    throw new Error(`${relativePath}: og:url no coincide con canonical.`);
+  }
+  for (const name of ['twitter:card', 'twitter:title', 'twitter:description']) {
+    if (!findTag(html, 'meta', { name })?.content?.trim()) {
+      throw new Error(`${relativePath}: falta ${name}.`);
+    }
+  }
+  if ((html.match(/<h1\b/gi) ?? []).length !== 1) {
+    throw new Error(`${relativePath}: debe contener exactamente un H1.`);
+  }
 
   const jsonLd = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
     .filter((match) => parseAttributes(match[1]).type === 'application/ld+json')
     .map((match) => JSON.parse(match[2]));
-  if (!jsonLd.some((entry) => entry?.['@type'] === structuredType)) {
-    throw new Error(`${relativePath}: falta JSON-LD ${structuredType}.`);
+  if (jsonLd.length !== 1 || jsonLd[0]?.['@type'] !== structuredType) {
+    throw new Error(`${relativePath}: debe contener únicamente JSON-LD ${structuredType}.`);
+  }
+
+  return { html, title, description: description.content };
+}
+
+function validateSitemap() {
+  const sitemap = fs.readFileSync(path.join(browserRoot, 'sitemap.xml'), 'utf8');
+  const simpleSitemapPattern =
+    /^<\?xml\s+version="1\.0"\s+encoding="UTF-8"\?>\s*<urlset\s+xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">(?:\s*<url>\s*<loc>https:\/\/hacenumeros\.com\/[^<]*<\/loc>\s*<\/url>)+\s*<\/urlset>\s*$/;
+  if (!simpleSitemapPattern.test(sitemap)) {
+    throw new Error('sitemap.xml no cumple la estructura XML simple esperada.');
+  }
+
+  const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+  if (JSON.stringify(urls) !== JSON.stringify(indexableUrls)) {
+    throw new Error('sitemap.xml no contiene exactamente las URLs indexables actuales.');
+  }
+}
+
+function validateRobots() {
+  const directives = fs
+    .readFileSync(path.join(browserRoot, 'robots.txt'), 'utf8')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const expected = ['User-agent: *', 'Allow: /', `Sitemap: ${siteOrigin}/sitemap.xml`];
+  if (JSON.stringify(directives) !== JSON.stringify(expected)) {
+    throw new Error('robots.txt debe permitir el sitio y declarar únicamente el sitemap canónico.');
+  }
+}
+
+function validateNotFound() {
+  const relativePath = '404.html';
+  const html = fs.readFileSync(path.join(browserRoot, relativePath), 'utf8');
+  const robots = findTag(html, 'meta', { name: 'robots' })?.content ?? '';
+  if (
+    !robots
+      .split(',')
+      .map((value) => value.trim())
+      .includes('noindex')
+  ) {
+    throw new Error('404.html debe declarar noindex.');
+  }
+  if (findTag(html, 'link', { rel: 'canonical' })) {
+    throw new Error('404.html no debe declarar canonical.');
+  }
+  if (findTag(html, 'meta', { 'http-equiv': 'refresh' })) {
+    throw new Error('404.html no debe redirigir automáticamente.');
+  }
+  if (!findTag(html, 'a', { href: '/' })) {
+    throw new Error('404.html debe ofrecer un enlace para volver al inicio.');
+  }
+}
+
+function validateInternalNavigation(homeHtml, calculatorHtml) {
+  if (!findTag(homeHtml, 'a', { href: '/calculadora-aumento-alquiler' })) {
+    throw new Error('La home no enlaza internamente a la calculadora publicada.');
+  }
+  if (!findTag(calculatorHtml, 'a', { href: '/' })) {
+    throw new Error('La calculadora no ofrece navegación interna hacia la home.');
+  }
+  if (!findTag(calculatorHtml, 'section', { id: 'metodologia' })) {
+    throw new Error('La sección enlazada de metodología no existe en la calculadora.');
   }
 }
 

@@ -6,16 +6,18 @@ import test from 'node:test';
 const root = process.cwd();
 
 test('production domain and crawler assets are coherent', async () => {
-  const [cname, robots, sitemap, index] = await Promise.all([
+  const [cname, robots, sitemap, index, notFound] = await Promise.all([
     read('public/CNAME'),
     read('public/robots.txt'),
     read('public/sitemap.xml'),
     read('src/index.html'),
+    read('public/404.html'),
   ]);
 
   assert.equal(cname.trim(), 'hacenumeros.com');
   assert.match(robots, /^User-agent: \*\r?\nAllow: \/$/m);
   assert.match(robots, /Sitemap: https:\/\/hacenumeros\.com\/sitemap\.xml/);
+  assert.doesNotMatch(robots, /^Disallow:/m);
   assert.deepEqual(sitemap.match(/<loc>[^<]+<\/loc>/g), [
     '<loc>https://hacenumeros.com/</loc>',
     '<loc>https://hacenumeros.com/calculadora-aumento-alquiler</loc>',
@@ -23,6 +25,9 @@ test('production domain and crawler assets are coherent', async () => {
   assert.match(index, /<html lang="es">/);
   assert.match(index, /<base href="\/"\s*\/>/);
   assert.doesNotMatch(index, /\/haceNumeros\//);
+  assert.match(notFound, /<meta name="robots" content="noindex,follow"\s*\/>/);
+  assert.doesNotMatch(notFound, /rel="canonical"/);
+  assert.doesNotMatch(sitemap, /404|data\/rent-indexes|github\.io|\/haceNumeros\//i);
 });
 
 test('public assets do not expose source spreadsheets', async () => {

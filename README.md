@@ -66,3 +66,30 @@ pendiente para una tarea futura el monitoreo automático de nuevas publicaciones
 
 No hay un comando manual de deploy ni una rama `gh-pages` administrada desde npm: el único camino
 de publicación es `commit → push a main → GitHub Actions → GitHub Pages`.
+
+## Search Console
+
+- Propiedad recomendada: dominio `hacenumeros.com`.
+- Verificación: registro DNS TXT, sin guardar el token en el repositorio.
+- Sitemap para enviar: `https://hacenumeros.com/sitemap.xml`.
+
+La inspección de URLs y la solicitud de indexación se realizan manualmente desde Search Console; el
+build y GitHub Actions no llaman a Google.
+
+## Checklist al publicar una nueva calculadora
+
+1. Crear la ruta pública en `src/app/app.routes.ts`.
+2. Confirmar que Angular la prerenderiza.
+3. Definir title, description y robots mediante `SeoService`.
+4. Definir su canonical HTTPS en `hacenumeros.com`.
+5. Agregar structured data sólo si representa contenido real y visible.
+6. Agregar la URL canónica a `public/sitemap.xml`.
+7. Agregar un enlace interno desde una página existente y eliminar su estado “Próximamente”.
+8. Agregar o actualizar tests SEO sin enlazar rutas futuras.
+9. Ejecutar `npm test`, `npm run build` y `npm run validate:dist`.
+10. Publicar mediante un push a `main` y comprobar el deploy de Pages.
+11. Inspeccionar la URL y solicitar indexación manualmente en Search Console.
+
+Con sólo dos páginas indexables, el sitemap continúa deliberadamente estático. Al agregar una nueva
+calculadora deben actualizarse conjuntamente ruta, metadata, enlace interno, sitemap y validador de
+distribución.
