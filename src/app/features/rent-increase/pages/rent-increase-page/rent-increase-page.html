@@ -7,14 +7,9 @@
         >Inicio</a
       >
       <app-icon name="chevron" class="size-4 text-subtle" />
-      <a
-        routerLink="/"
-        fragment="categorias"
-        class="rounded-sm hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-        >Hogar y movilidad</a
+      <span aria-current="page" class="font-semibold text-ink"
+        >Calculadora de aumento de alquiler</span
       >
-      <app-icon name="chevron" class="size-4 text-subtle" />
-      <span aria-current="page" class="font-semibold text-ink">Aumento de alquiler</span>
     </nav>
 
     <div class="mt-7 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -294,7 +289,10 @@
       </aside>
     </section>
 
-    <section class="rounded-card border border-border bg-white p-6 shadow-soft sm:p-8">
+    <section
+      id="metodologia"
+      class="scroll-mt-24 rounded-card border border-border bg-white p-6 shadow-soft sm:p-8"
+    >
       <h2 class="font-display text-2xl font-bold text-ink">Fuentes y metodología</h2>
       <p class="mt-4 leading-7 text-muted">
         La calculadora utiliza archivos JSON generados localmente a partir de las fuentes oficiales

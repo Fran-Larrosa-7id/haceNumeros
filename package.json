@@ -10,7 +10,7 @@
     "data:rent:build": "node scripts/update-rent-indexes.mjs",
     "data:rent:test": "node --test scripts/*.test.mjs",
     "serve:ssr:haceNumeros": "node dist/haceNumeros/server/server.mjs",
-    "prod": "ng build --configuration production --base-href \"/haceNumeros/\"",
+    "prod": "ng build --configuration production",
     "deploy": "npm run prod && npx angular-cli-ghpages --dir=dist/haceNumeros/browser"
   },
   "private": true,
