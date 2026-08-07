@@ -1,73 +1,68 @@
-# HaceNumeros
+# Hacé Números
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.1.
+Calculadoras gratuitas para Argentina construidas con Angular. El sitio estático de producción se
+publica en `https://hacenumeros.com/` mediante GitHub Pages.
 
-## Development server
+## Desarrollo local
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Se utiliza Node.js 22.22.3 LTS en CI. Para instalar exactamente las dependencias del lockfile e
+iniciar el servidor local:
 
 ```bash
-ng generate component component-name
+npm ci
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Validación
+
+Los datasets oficiales ya generados se validan sin descargarlos ni modificarlos:
 
 ```bash
-ng generate --help
+npm run data:rent:validate
 ```
 
-## Building
-
-To build the project run:
+La cobertura disponible puede consultarse informativamente —su antigüedad no bloquea CI— con:
 
 ```bash
-ng build
+npm run data:rent:status
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Production deployment
-
-The canonical production URL is `https://hacenumeros.com/`. Production builds use the root
-`base href` from `src/index.html`; they must not be built with `/haceNumeros/`.
-
-To build and publish the static output to the configured GitHub Pages branch:
+Para ejecutar la validación completa de producción:
 
 ```bash
-npm run deploy
+npm run data:rent:validate
+npm test
+npm run build
+npm run validate:dist
 ```
 
-The file `public/CNAME` is copied into the published artifact so GitHub Pages retains the custom
-domain. DNS and HTTPS are configured manually in the domain provider and in GitHub Pages settings.
+`validate:dist` comprueba el prerender, la metadata SEO, los archivos públicos y los datasets del
+artefacto, y verifica que no se publiquen fuentes XLS, XLSX, CSV o PDF.
 
-## Running unit tests
+## Actualización manual de datos
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Las fuentes versionadas están en `data-sources/rent-indexes`. Para regenerar los JSON después de
+incorporar manualmente una fuente oficial validada:
 
 ```bash
-ng test
+npm run data:rent:build
+npm run data:rent:validate
+npm test
+npm run build
+npm run validate:dist
 ```
 
-## Running end-to-end tests
+No existe descarga automática, scraping, cron ni modificación de datasets desde CI. Queda
+pendiente para una tarea futura el monitoreo automático de nuevas publicaciones oficiales.
 
-For end-to-end (e2e) testing, run:
+## CI/CD y publicación
 
-```bash
-ng e2e
-```
+- Los pull requests ejecutan instalación reproducible, validación de datasets, tests, build,
+  prerender y validación del artefacto. Nunca despliegan.
+- Cada push a `main` repite esas validaciones y, únicamente si todas pasan, publica
+  `dist/haceNumeros/browser` con el flujo oficial de GitHub Pages.
+- El deploy también puede relanzarse manualmente desde GitHub Actions.
+- `public/CNAME` conserva el dominio personalizado y el build mantiene `<base href="/">`.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+No hay un comando manual de deploy ni una rama `gh-pages` administrada desde npm: el único camino
+de publicación es `commit → push a main → GitHub Actions → GitHub Pages`.
