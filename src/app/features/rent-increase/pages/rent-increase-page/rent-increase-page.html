@@ -45,7 +45,7 @@
         Disponibilidad de datos
       </p>
       @if (manifest(); as data) {
-        <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+        <dl class="mt-3 grid gap-3 text-sm sm:grid-cols-3">
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <dt class="font-bold text-ink">ICL</dt>
             <dd class="text-muted">{{ availabilityLabel('icl', data.datasets.icl) }}</dd>
@@ -53,6 +53,12 @@
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <dt class="font-bold text-ink">IPC</dt>
             <dd class="text-muted">{{ availabilityLabel('ipc', data.datasets.ipc) }}</dd>
+          </div>
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <dt class="font-bold text-ink">Casa Propia</dt>
+            <dd class="text-muted">
+              {{ availabilityLabel('casa-propia', data.datasets['casa-propia']) }}
+            </dd>
           </div>
         </dl>
       } @else if (manifestState() === 'error') {
@@ -132,6 +138,15 @@
                 {{ formatPercentage(result.manualPercentage ?? 0) }}
               </dd>
             </div>
+          } @else if (result.method === 'casa-propia') {
+            <div class="rounded-xl bg-surface-muted p-4 sm:col-span-2">
+              <dt class="text-sm text-muted">Períodos incluidos</dt>
+              <dd class="mt-2 font-display text-xl font-bold text-ink">
+                {{ result.casaPropiaPeriods?.length }} meses, del
+                {{ formatMonth(result.casaPropiaPeriods?.[0]?.date ?? '') }} al
+                {{ formatMonth(result.casaPropiaPeriods?.at(-1)?.date ?? '') }}
+              </dd>
+            </div>
           } @else {
             <div class="rounded-xl bg-surface-muted p-4">
               <dt class="text-sm text-muted">Valor inicial del índice</dt>
@@ -161,6 +176,23 @@
             </dd>
           </div>
         </dl>
+        @if (result.method === 'casa-propia') {
+          <details class="mt-4 rounded-xl border border-border bg-white">
+            <summary
+              class="cursor-pointer px-4 py-4 font-bold text-primary focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary"
+            >
+              Ver coeficientes mensuales aplicados
+            </summary>
+            <ul class="grid gap-2 border-t border-border p-4 sm:grid-cols-2">
+              @for (point of result.casaPropiaPeriods; track point.date) {
+                <li class="flex items-center justify-between gap-3 rounded-lg bg-surface-muted p-3 text-sm">
+                  <span class="text-muted">{{ formatMonth(point.date) }}</span>
+                  <strong class="text-ink">{{ formatCoefficient(point.value) }} · {{ point.basis }}</strong>
+                </li>
+              }
+            </ul>
+          </details>
+        }
       </section>
 
       <section class="rounded-card border border-border bg-white p-5 shadow-soft sm:p-7">
@@ -267,12 +299,15 @@
       <p class="mt-4 leading-7 text-muted">
         La calculadora utiliza archivos JSON generados localmente a partir de las fuentes oficiales
         suministradas. El ICL conserva sus observaciones diarias y el IPC utiliza exclusivamente la
-        serie mensual Nivel general de la región Nacional. No se interpolan fechas ni períodos.
+        serie mensual Nivel general de la región Nacional. Casa Propia aplica de forma acumulativa
+        cada coeficiente mensual publicado dentro del rango inclusivo seleccionado. No se interpolan
+        fechas ni períodos.
       </p>
       <p class="mt-3 leading-7 text-muted">
         La fuente que participó del cálculo y el último dato disponible aparecen junto al resultado.
-        Casa Propia continúa sin datos hasta contar con una fuente válida. El modo manual sigue
-        funcionando sin cargar datasets ni almacenar información.
+        Los coeficientes Casa Propia provienen de la Secretaría de Obras Públicas y conservan la
+        referencia mensual CVS o CER informada en la fuente. El modo manual sigue funcionando sin
+        cargar datasets ni almacenar información.
       </p>
     </section>
 

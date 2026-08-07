@@ -73,6 +73,36 @@ describe('RentCalculatorForm', () => {
     expect(element.textContent).toContain('Mes final');
   });
 
+  it('uses monthly controls for Casa Propia and accepts an inclusive single month', () => {
+    let emitted: RentFormValue | undefined;
+    fixture.componentInstance.calculateRequested.subscribe((value) => (emitted = value));
+    setControlValue('#index-type', 'casa-propia', 'change');
+    fixture.detectChanges();
+
+    expect(query<HTMLInputElement>('#last-adjustment').dataset['pickerMode']).toBe('month');
+    expect(query<HTMLInputElement>('#next-adjustment').dataset['pickerMode']).toBe('month');
+    expect(element.textContent).toContain('incluyendo el mes inicial y el final');
+
+    setControlValue('#current-rent', '100000');
+    setControlValue('#last-adjustment', '2026-01');
+    setControlValue('#next-adjustment', '2026-01');
+    query<HTMLButtonElement>('button[type="submit"]').click();
+    expect(emitted?.lastAdjustmentDate).toBe('2026-01');
+    expect(emitted?.nextAdjustmentDate).toBe('2026-01');
+  });
+
+  it('keeps monthly values when switching between Casa Propia and IPC', () => {
+    setControlValue('#index-type', 'casa-propia', 'change');
+    fixture.detectChanges();
+    setControlValue('#last-adjustment', '2026-01');
+    setControlValue('#next-adjustment', '2026-02');
+
+    setControlValue('#index-type', 'ipc', 'change');
+    fixture.detectChanges();
+    expect(query<HTMLInputElement>('#last-adjustment').value).toContain('enero');
+    expect(query<HTMLInputElement>('#next-adjustment').value).toContain('febrero');
+  });
+
   it('clears entered values and emits the reset event', () => {
     let cleared = false;
     fixture.componentInstance.cleared.subscribe(() => (cleared = true));

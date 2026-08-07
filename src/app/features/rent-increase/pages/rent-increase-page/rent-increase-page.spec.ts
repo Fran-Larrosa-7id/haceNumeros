@@ -103,14 +103,41 @@ describe('RentIncreasePage', () => {
     expect(resultCard().textContent).toContain('Error de carga');
   });
 
-  it('keeps Casa Propia unavailable and clear returns to idle', async () => {
+  it('compounds Casa Propia monthly coefficients and shows their breakdown', async () => {
     selectIndex('casa-propia');
     setControlValue('#current-rent', '100000');
-    setControlValue('#last-adjustment', '2025-01-01');
-    setControlValue('#next-adjustment', '2026-01-01');
+    setControlValue('#last-adjustment', '2026-01');
+    setControlValue('#next-adjustment', '2026-03');
     submit();
+    http.expectOne('data/rent-indexes/casa-propia.json').flush(
+      datasetFixture('casa-propia', [
+        { period: '2026-01', value: 1.02, index: 'CVS' },
+        { period: '2026-02', value: 1.03, index: 'CER' },
+        { period: '2026-03', value: 1.01, index: 'CVS' },
+      ]),
+    );
+    await detectAsyncChanges();
+
+    expect(resultCard().textContent).toContain('106.110');
+    expect(element.textContent).toContain('Ver coeficientes mensuales aplicados');
+    expect(element.textContent).toContain('CVS');
+  });
+
+  it('lists a missing Casa Propia month instead of interpolating it', async () => {
+    selectIndex('casa-propia');
+    setControlValue('#current-rent', '100000');
+    setControlValue('#last-adjustment', '2026-01');
+    setControlValue('#next-adjustment', '2026-03');
+    submit();
+    http.expectOne('data/rent-indexes/casa-propia.json').flush(
+      datasetFixture('casa-propia', [
+        { period: '2026-01', value: 1.02, index: 'CVS' },
+        { period: '2026-03', value: 1.01, index: 'CVS' },
+      ]),
+    );
     await detectAsyncChanges();
     expect(resultCard().textContent).toContain('Datos no disponibles');
+    expect(resultCard().textContent).toContain('2026-02');
 
     query<HTMLButtonElement>('button[type="button"]').click();
     fixture.detectChanges();
@@ -166,6 +193,13 @@ describe('RentIncreasePage', () => {
             to: '2026-06',
             rowCount: 115,
           },
+          'casa-propia': {
+            file: 'casa-propia.json',
+            frequency: 'monthly',
+            from: '2023-03',
+            to: '2026-09',
+            rowCount: 43,
+          },
         },
       });
     }
@@ -177,10 +211,14 @@ describe('RentIncreasePage', () => {
   }
 
   function datasetFixture(
-    type: 'icl' | 'ipc',
+    type: 'icl' | 'ipc' | 'casa-propia',
     values: readonly (
       | { readonly date: string; readonly value: number }
-      | { readonly period: string; readonly value: number }
+      | {
+          readonly period: string;
+          readonly value: number;
+          readonly index?: 'CVS' | 'CER';
+        }
     )[],
   ): object {
     const first = values[0];
@@ -193,6 +231,9 @@ describe('RentIncreasePage', () => {
       schemaVersion: 1,
       type,
       frequency: type === 'icl' ? 'daily' : 'monthly',
+      ...(type === 'casa-propia'
+        ? { calculationMode: 'compound-monthly-coefficients' }
+        : {}),
       source: {
         organization: 'Organismo oficial de prueba',
         shortName: 'TEST',

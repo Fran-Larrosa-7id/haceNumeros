@@ -13,7 +13,12 @@ import { Icon, IconName } from '../../../../shared/ui/icon/icon';
 import { RentCalculationResultCard } from '../../components/rent-calculation-result/rent-calculation-result';
 import { RentCalculatorForm } from '../../components/rent-calculator-form/rent-calculator-form';
 import { RentIndexRepository } from '../../data-access/rent-index-repository';
-import { calculateIndexedIncrease, calculateManualIncrease } from '../../domain/rent-calculation';
+import {
+  calculateCasaPropiaIncrease,
+  calculateIndexedIncrease,
+  calculateManualIncrease,
+  MissingCasaPropiaPeriodsError,
+} from '../../domain/rent-calculation';
 import {
   CalculationState,
   IndexedRentType,
@@ -199,7 +204,7 @@ export class RentIncreasePage {
   }
 
   protected formatCoefficient(value: number): string {
-    return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 4 }).format(value);
+    return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 8 }).format(value);
   }
 
   protected comparisonHeight(value: number, result: RentCalculationResult): number {
@@ -211,7 +216,7 @@ export class RentIncreasePage {
     return this.getSuccessfulResult();
   }
 
-  protected availabilityLabel(type: 'icl' | 'ipc', entry: RentIndexManifestEntry): string {
+  protected availabilityLabel(type: IndexedRentType, entry: RentIndexManifestEntry): string {
     return type === 'icl'
       ? `Disponible hasta el ${this.formatDate(entry.to)}`
       : `Último período: ${this.formatMonth(entry.to)}`;
@@ -229,7 +234,7 @@ export class RentIncreasePage {
       indexLabel: labels[type],
     });
 
-    let dataset: RentIndexDataset | null;
+    let dataset: RentIndexDataset;
     try {
       dataset = await this.repository.getDataset(type);
     } catch {
@@ -243,16 +248,31 @@ export class RentIncreasePage {
       return;
     }
 
-    if (!dataset) {
-      this.calculationState.set({
-        status: 'unavailable',
-        indexType: type,
-        indexLabel: labels[type],
-        startDate: value.lastAdjustmentDate,
-        endDate: value.nextAdjustmentDate,
-        message:
-          'Casa Propia todavía no tiene un dataset validado incorporado. Preferimos no completar el cálculo con coeficientes estimados o valores sin verificar.',
-      });
+    if (type === 'casa-propia') {
+      try {
+        this.calculationState.set({
+          status: 'success',
+          result: calculateCasaPropiaIncrease({
+            currentRent: value.currentRent,
+            startPeriod: value.lastAdjustmentDate,
+            endPeriod: value.nextAdjustmentDate,
+            dataset,
+          }),
+        });
+      } catch (error) {
+        if (!(error instanceof MissingCasaPropiaPeriodsError)) {
+          throw error;
+        }
+        this.calculationState.set({
+          status: 'unavailable',
+          indexType: type,
+          indexLabel: labels[type],
+          startDate: value.lastAdjustmentDate,
+          endDate: value.nextAdjustmentDate,
+          missingPeriods: error.periods,
+          message: `No encontramos todos los coeficientes mensuales requeridos. Hay datos disponibles desde ${this.formatCoverage(type, dataset.coverage.from)} hasta ${this.formatCoverage(type, dataset.coverage.to)}. No completamos ni interpolamos períodos faltantes.`,
+        });
+      }
       return;
     }
 
@@ -299,7 +319,7 @@ export class RentIncreasePage {
   }
 
   private formatCoverage(type: IndexedRentType, value: string): string {
-    return type === 'ipc' ? this.formatMonth(value) : this.formatDate(value);
+    return type === 'icl' ? this.formatDate(value) : this.formatMonth(value);
   }
 
   private formatDate(value: string): string {
@@ -308,7 +328,7 @@ export class RentIncreasePage {
     );
   }
 
-  private formatMonth(value: string): string {
+  protected formatMonth(value: string): string {
     return new Intl.DateTimeFormat('es-AR', {
       month: 'long',
       year: 'numeric',

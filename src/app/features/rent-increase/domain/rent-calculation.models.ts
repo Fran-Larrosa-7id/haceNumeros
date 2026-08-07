@@ -1,6 +1,7 @@
 export type RentIndexType = 'icl' | 'ipc' | 'casa-propia' | 'manual';
 
 export type IndexedRentType = Exclude<RentIndexType, 'manual'>;
+export type RatioRentIndexType = Extract<IndexedRentType, 'icl' | 'ipc'>;
 
 export type RentIndexFrequency = 'daily' | 'monthly';
 
@@ -9,11 +10,13 @@ export type AdjustmentFrequency = 'quarterly' | 'four-monthly' | 'semiannual' | 
 export interface RentIndexPoint {
   readonly date: string;
   readonly value: number;
+  readonly basis?: 'CVS' | 'CER';
 }
 
 export interface RentIndexDataset {
   readonly type: IndexedRentType;
   readonly frequency: RentIndexFrequency;
+  readonly calculationMode?: 'compound-monthly-coefficients';
   readonly sourceName: string;
   readonly sourceShortName: string;
   readonly sourceFile: string;
@@ -41,6 +44,7 @@ export interface RentIndexManifest {
   readonly datasets: {
     readonly icl: RentIndexManifestEntry;
     readonly ipc: RentIndexManifestEntry;
+    readonly 'casa-propia': RentIndexManifestEntry;
   };
 }
 
@@ -66,6 +70,7 @@ export interface RentCalculationResult {
   readonly initialPoint?: RentIndexPoint;
   readonly finalPoint?: RentIndexPoint;
   readonly manualPercentage?: number;
+  readonly casaPropiaPeriods?: readonly RentIndexPoint[];
 }
 
 export type CalculationState =
@@ -89,5 +94,6 @@ export type CalculationState =
       readonly startDate: string;
       readonly endDate: string;
       readonly message: string;
+      readonly missingPeriods?: readonly string[];
     }
   | { readonly status: 'success'; readonly result: RentCalculationResult };

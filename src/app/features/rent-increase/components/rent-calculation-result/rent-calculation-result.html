@@ -67,17 +67,23 @@
           <dl class="mt-5 grid gap-3 border-t border-border pt-4 text-sm sm:grid-cols-2">
             <div>
               <dt class="text-subtle">
-                {{ currentState.indexType === 'ipc' ? 'Mes inicial' : 'Fecha inicial' }}
+                {{ currentState.indexType === 'icl' ? 'Fecha inicial' : 'Mes inicial' }}
               </dt>
               <dd class="mt-1 font-bold text-ink">{{ currentState.startDate }}</dd>
             </div>
             <div>
               <dt class="text-subtle">
-                {{ currentState.indexType === 'ipc' ? 'Mes final' : 'Fecha final' }}
+                {{ currentState.indexType === 'icl' ? 'Fecha final' : 'Mes final' }}
               </dt>
               <dd class="mt-1 font-bold text-ink">{{ currentState.endDate }}</dd>
             </div>
           </dl>
+          @if (currentState.missingPeriods?.length) {
+            <div class="mt-4 rounded-lg bg-surface-muted p-4 text-sm">
+              <p class="font-bold text-ink">Períodos faltantes</p>
+              <p class="mt-1 text-muted">{{ currentState.missingPeriods?.join(', ') }}</p>
+            </div>
+          }
           <p class="mt-5 rounded-lg bg-surface-muted p-4 text-sm leading-6 text-muted">
             Si tu contrato establece un porcentaje fijo, elegí “Porcentaje manual” para calcularlo.
           </p>
@@ -110,7 +116,9 @@
             </dd>
           </div>
           <div class="flex items-center justify-between gap-4 py-4">
-            <dt class="text-sm text-muted">Coeficiente aplicado</dt>
+            <dt class="text-sm text-muted">
+              {{ currentState.result.method === 'casa-propia' ? 'Coeficiente acumulado' : 'Coeficiente aplicado' }}
+            </dt>
             <dd class="font-bold text-ink">
               {{ formatCoefficient(currentState.result.coefficient) }}
             </dd>

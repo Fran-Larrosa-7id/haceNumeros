@@ -101,7 +101,7 @@
           }}</label>
           <app-date-picker
             inputId="last-adjustment"
-            [mode]="isIpcMode() ? 'month' : 'day'"
+            [mode]="isMonthlyMode() ? 'month' : 'day'"
             formControlName="lastAdjustmentDate"
             [invalid]="
               form.controls.lastAdjustmentDate.touched && form.controls.lastAdjustmentDate.invalid
@@ -120,7 +120,7 @@
           }}</label>
           <app-date-picker
             inputId="next-adjustment"
-            [mode]="isIpcMode() ? 'month' : 'day'"
+            [mode]="isMonthlyMode() ? 'month' : 'day'"
             formControlName="nextAdjustmentDate"
             [invalid]="
               form.controls.nextAdjustmentDate.touched && form.controls.nextAdjustmentDate.invalid

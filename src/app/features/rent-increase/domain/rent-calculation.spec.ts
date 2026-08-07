@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { RentIndexDataset } from './rent-calculation.models';
 import {
+  calculateCasaPropiaIncrease,
   calculateIndexedIncrease,
   calculateManualIncrease,
+  getCasaPropiaPeriods,
   hasValidDateRange,
+  MissingCasaPropiaPeriodsError,
 } from './rent-calculation';
 
 const testDataset: RentIndexDataset = {
@@ -16,6 +19,22 @@ const testDataset: RentIndexDataset = {
   updatedAt: '2026-01-01',
   coverage: { from: '2025-01-01', to: '2026-01-01' },
   values: [],
+};
+
+const casaPropiaDataset: RentIndexDataset = {
+  ...testDataset,
+  type: 'casa-propia',
+  frequency: 'monthly',
+  calculationMode: 'compound-monthly-coefficients',
+  effectiveFrom: '2026-01',
+  updatedAt: '2026-04',
+  coverage: { from: '2026-01', to: '2026-04' },
+  values: [
+    { date: '2026-01', value: 1.02, basis: 'CVS' },
+    { date: '2026-02', value: 1.03, basis: 'CER' },
+    { date: '2026-03', value: 1.01, basis: 'CVS' },
+    { date: '2026-04', value: 1.04, basis: 'CER' },
+  ],
 };
 
 describe('rent calculation', () => {
@@ -116,5 +135,81 @@ describe('rent calculation', () => {
     expect(hasValidDateRange('2025-01-01', '2026-01-01')).toBe(true);
     expect(hasValidDateRange('2026-01-01', '2025-01-01')).toBe(false);
     expect(hasValidDateRange('', '2026-01-01')).toBe(false);
+  });
+
+  it('includes both the start and end months for Casa Propia', () => {
+    expect(getCasaPropiaPeriods('2026-01', '2026-04')).toEqual([
+      '2026-01',
+      '2026-02',
+      '2026-03',
+      '2026-04',
+    ]);
+  });
+
+  it('supports a single Casa Propia month', () => {
+    const result = calculateCasaPropiaIncrease({
+      currentRent: 100_000,
+      startPeriod: '2026-02',
+      endPeriod: '2026-02',
+      dataset: casaPropiaDataset,
+    });
+    expect(result.coefficient).toBe(1.03);
+    expect(result.newRent).toBe(103_000);
+    expect(result.casaPropiaPeriods?.map((point) => point.date)).toEqual(['2026-02']);
+  });
+
+  it('compounds every Casa Propia coefficient without intermediate rounding', () => {
+    const result = calculateCasaPropiaIncrease({
+      currentRent: 123_456.78,
+      startPeriod: '2026-01',
+      endPeriod: '2026-03',
+      dataset: casaPropiaDataset,
+    });
+    expect(result.coefficient).toBeCloseTo(1.02 * 1.03 * 1.01, 12);
+    expect(result.newRent).toBeCloseTo(123_456.78 * 1.02 * 1.03 * 1.01, 8);
+  });
+
+  it('reports every missing Casa Propia period', () => {
+    const incomplete = {
+      ...casaPropiaDataset,
+      values: casaPropiaDataset.values.filter((point) => point.date !== '2026-02'),
+    };
+    expect(() =>
+      calculateCasaPropiaIncrease({
+        currentRent: 100_000,
+        startPeriod: '2026-01',
+        endPeriod: '2026-03',
+        dataset: incomplete,
+      }),
+    ).toThrowError(MissingCasaPropiaPeriodsError);
+    try {
+      calculateCasaPropiaIncrease({
+        currentRent: 100_000,
+        startPeriod: '2026-01',
+        endPeriod: '2026-03',
+        dataset: incomplete,
+      });
+    } catch (error) {
+      expect((error as MissingCasaPropiaPeriodsError).periods).toEqual(['2026-02']);
+    }
+  });
+
+  it.each([
+    ['', '2026-01'],
+    ['2026-00', '2026-01'],
+    ['2026-02', '2026-01'],
+  ])('rejects an invalid Casa Propia range %s to %s', (startPeriod, endPeriod) => {
+    expect(() => getCasaPropiaPeriods(startPeriod, endPeriod)).toThrow(RangeError);
+  });
+
+  it('rejects invalid Casa Propia coefficients', () => {
+    expect(() =>
+      calculateCasaPropiaIncrease({
+        currentRent: 100_000,
+        startPeriod: '2026-01',
+        endPeriod: '2026-01',
+        dataset: { ...casaPropiaDataset, values: [{ date: '2026-01', value: 0 }] },
+      }),
+    ).toThrow(RangeError);
   });
 });

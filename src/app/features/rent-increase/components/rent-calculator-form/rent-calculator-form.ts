@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Icon } from '../../../../shared/ui/icon/icon';
 import { DatePicker } from '../../../../shared/ui/date-picker/date-picker';
 import { MoneyInput } from '../../../../shared/ui/money-input/money-input';
-import { hasValidDateRange, monthsBetween } from '../../domain/rent-calculation';
+import { getCasaPropiaPeriods, hasValidDateRange, monthsBetween } from '../../domain/rent-calculation';
 import {
   AdjustmentFrequency,
   RentFormValue,
@@ -85,29 +85,36 @@ export class RentCalculatorForm {
     return this.form.controls.indexType.value === 'manual';
   }
 
-  protected isIpcMode(): boolean {
-    return this.form.controls.indexType.value === 'ipc';
+  protected isMonthlyMode(): boolean {
+    const type = this.form.controls.indexType.value;
+    return type === 'ipc' || type === 'casa-propia';
+  }
+
+  protected isCasaPropiaMode(): boolean {
+    return this.form.controls.indexType.value === 'casa-propia';
   }
 
   protected startPeriodLabel(): string {
-    return this.isIpcMode() ? 'Mes inicial' : 'Fecha del último ajuste';
+    return this.isMonthlyMode() ? 'Mes inicial' : 'Fecha del último ajuste';
   }
 
   protected endPeriodLabel(): string {
-    return this.isIpcMode() ? 'Mes final' : 'Fecha del próximo ajuste';
+    return this.isMonthlyMode() ? 'Mes final' : 'Fecha del próximo ajuste';
   }
 
   protected startPeriodError(): string {
-    return this.isIpcMode() ? 'Elegí el mes inicial.' : 'Elegí la fecha del último ajuste.';
+    return this.isMonthlyMode() ? 'Elegí el mes inicial.' : 'Elegí la fecha del último ajuste.';
   }
 
   protected endPeriodError(): string {
-    return this.isIpcMode() ? 'Elegí el mes final.' : 'Elegí la fecha del próximo ajuste.';
+    return this.isMonthlyMode() ? 'Elegí el mes final.' : 'Elegí la fecha del próximo ajuste.';
   }
 
   protected rangeError(): string {
-    return this.isIpcMode()
-      ? 'El mes final debe ser posterior al mes inicial.'
+    return this.isMonthlyMode()
+      ? this.isCasaPropiaMode()
+        ? 'El mes final no puede ser anterior al mes inicial.'
+        : 'El mes final debe ser posterior al mes inicial.'
       : 'La próxima fecha debe ser posterior al último ajuste.';
   }
 
@@ -118,7 +125,7 @@ export class RentCalculatorForm {
       case 'ipc':
         return 'El IPC se publica por períodos mensuales. Seleccioná los meses que correspondan a tu contrato.';
       case 'casa-propia':
-        return 'La integración de datos de Casa Propia está pendiente.';
+        return 'Casa Propia aplica los coeficientes mensuales publicados para cada mes seleccionado, incluyendo el mes inicial y el final.';
       case 'manual':
         return 'Ingresá el porcentaje fijo indicado en tu contrato.';
     }
@@ -129,10 +136,22 @@ export class RentCalculatorForm {
       return null;
     }
 
-    const months = monthsBetween(
-      this.form.controls.lastAdjustmentDate.value,
-      this.form.controls.nextAdjustmentDate.value,
-    );
+    let months: number | null;
+    if (this.isCasaPropiaMode()) {
+      try {
+        months = getCasaPropiaPeriods(
+          this.form.controls.lastAdjustmentDate.value,
+          this.form.controls.nextAdjustmentDate.value,
+        ).length;
+      } catch {
+        months = null;
+      }
+    } else {
+      months = monthsBetween(
+        this.form.controls.lastAdjustmentDate.value,
+        this.form.controls.nextAdjustmentDate.value,
+      );
+    }
     if (months === null) {
       return null;
     }
@@ -192,8 +211,9 @@ export class RentCalculatorForm {
   }
 
   private configureMode(type: RentIndexType): void {
-    const switchesPeriodType = this.usesMonthlyPeriods !== (type === 'ipc');
-    this.usesMonthlyPeriods = type === 'ipc';
+    const monthlyPeriods = type === 'ipc' || type === 'casa-propia';
+    const switchesPeriodType = this.usesMonthlyPeriods !== monthlyPeriods;
+    this.usesMonthlyPeriods = monthlyPeriods;
     const manualControl = this.form.controls.manualPercentage;
     const dateControls = [
       this.form.controls.lastAdjustmentDate,
@@ -235,8 +255,19 @@ export class RentCalculatorForm {
     const endControl = this.form.controls.nextAdjustmentDate;
     const endDate = endControl.value;
 
-    if (startDate && endDate && !hasValidDateRange(startDate, endDate)) {
-      endControl.setErrors({ ...endControl.errors, dateRange: true });
+    if (startDate && endDate) {
+      let valid = hasValidDateRange(startDate, endDate);
+      if (this.isCasaPropiaMode()) {
+        try {
+          getCasaPropiaPeriods(startDate, endDate);
+          valid = true;
+        } catch {
+          valid = false;
+        }
+      }
+      if (!valid) {
+        endControl.setErrors({ ...endControl.errors, dateRange: true });
+      }
     }
   }
 

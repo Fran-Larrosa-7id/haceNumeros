@@ -2,8 +2,14 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PDFParse } from 'pdf-parse';
 import XLSX from 'xlsx';
-import { parseIclRows, parseIpcCsv, validateDataset } from './rent-index-parsers.mjs';
+import {
+  parseCasaPropiaText,
+  parseIclRows,
+  parseIpcCsv,
+  validateDataset,
+} from './rent-index-parsers.mjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const argumentsMap = parseArguments(process.argv.slice(2));
@@ -13,17 +19,26 @@ const iclPath = path.resolve(argumentsMap.icl ?? path.join(sourceDirectory, 'dia
 const ipcPath = path.resolve(
   argumentsMap.ipc ?? path.join(sourceDirectory, 'serie_ipc_divisiones.csv'),
 );
+const casaPropiaPath = path.resolve(
+  argumentsMap['casa-propia'] ??
+    path.join(sourceDirectory, 'coeficientes-casa-propia-ago-sep-2026.pdf'),
+);
 const acceptRevisions = argumentsMap['accept-revisions'] === true;
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 
-function main() {
+async function main() {
   assertFile(iclPath, 'ICL');
   assertFile(ipcPath, 'IPC');
+  assertFile(casaPropiaPath, 'Casa Propia');
 
   const generatedAt = new Date().toISOString();
   const iclValues = readIcl(iclPath);
   const ipcValues = readIpc(ipcPath);
+  const casaPropiaValues = await readCasaPropia(casaPropiaPath);
   const icl = buildDataset({
     type: 'icl',
     frequency: 'daily',
@@ -46,16 +61,31 @@ function main() {
     datasetName: 'IPC Nacional - Nivel general',
     generatedAt,
   });
+  const casaPropia = buildDataset({
+    type: 'casa-propia',
+    frequency: 'monthly',
+    calculationMode: 'compound-monthly-coefficients',
+    values: casaPropiaValues,
+    key: 'period',
+    sourcePath: casaPropiaPath,
+    organization: 'Ministerio de Economía de la República Argentina',
+    shortName: 'Secretaría de Obras Públicas',
+    datasetName: 'Coeficiente de actualización de los Créditos Casa Propia',
+    generatedAt,
+  });
 
   validateDataset(icl);
   validateDataset(ipc);
+  validateDataset(casaPropia);
 
   const changes = {
     icl: compareWithExisting(icl, 'date'),
     ipc: compareWithExisting(ipc, 'period'),
+    casaPropia: compareWithExisting(casaPropia, 'period'),
   };
   enforceSafeUpdate(icl, changes.icl, acceptRevisions);
   enforceSafeUpdate(ipc, changes.ipc, acceptRevisions);
+  enforceSafeUpdate(casaPropia, changes.casaPropia, acceptRevisions);
 
   const manifest = {
     schemaVersion: 1,
@@ -63,17 +93,20 @@ function main() {
     datasets: {
       icl: manifestEntry(icl, 'icl.json'),
       ipc: manifestEntry(ipc, 'ipc.json'),
+      'casa-propia': manifestEntry(casaPropia, 'casa-propia.json'),
     },
   };
 
   writeAllAtomically([
     ['icl.json', `${JSON.stringify(icl)}\n`],
     ['ipc.json', `${JSON.stringify(ipc)}\n`],
+    ['casa-propia.json', `${JSON.stringify(casaPropia)}\n`],
     ['manifest.json', `${JSON.stringify(manifest, null, 2)}\n`],
   ]);
 
   printSummary(icl, changes.icl);
   printSummary(ipc, changes.ipc);
+  printSummary(casaPropia, changes.casaPropia);
   console.log('\nDatasets generados y validados correctamente.');
 }
 
@@ -111,9 +144,23 @@ function readIpc(filePath) {
   return parseIpcCsv(text);
 }
 
+async function readCasaPropia(filePath) {
+  const parser = new PDFParse({ data: fs.readFileSync(filePath) });
+  try {
+    const result = await parser.getText();
+    if (result.total < 1 || !result.text.trim()) {
+      throw new Error('El PDF Casa Propia no contiene texto extraíble.');
+    }
+    return parseCasaPropiaText(result.text);
+  } finally {
+    await parser.destroy();
+  }
+}
+
 function buildDataset({
   type,
   frequency,
+  calculationMode,
   values,
   key,
   sourcePath,
@@ -126,6 +173,7 @@ function buildDataset({
     schemaVersion: 1,
     type,
     frequency,
+    ...(calculationMode ? { calculationMode } : {}),
     source: {
       organization,
       shortName,
@@ -239,7 +287,8 @@ function manifestEntry(dataset, file) {
 }
 
 function printSummary(dataset, changes) {
-  console.log(`\n${dataset.type.toUpperCase()}\n---`);
+  const label = dataset.type === 'casa-propia' ? 'CASA PROPIA' : dataset.type.toUpperCase();
+  console.log(`\n${label}\n---`);
   console.log(`Fuente: ${dataset.source.sourceFile}`);
   console.log(`Serie: ${dataset.source.datasetName}`);
   console.log(`Observaciones: ${dataset.rowCount}`);

@@ -74,8 +74,39 @@ describe('RentIndexRepository', () => {
     expect(repository.findPoint(dataset as RentIndexDataset, '2026-01')?.value).toBe(125);
   });
 
-  it('keeps Casa Propia unavailable without issuing a request', async () => {
-    await expect(repository.getDataset('casa-propia')).resolves.toBeNull();
+  it('loads, maps and caches Casa Propia monthly coefficients', async () => {
+    const first = repository.getDataset('casa-propia');
+    const second = repository.getDataset('casa-propia');
+    expect(first).toBe(second);
+
+    http.expectOne('data/rent-indexes/casa-propia.json').flush({
+      schemaVersion: 1,
+      type: 'casa-propia',
+      frequency: 'monthly',
+      calculationMode: 'compound-monthly-coefficients',
+      source: {
+        organization: 'Ministerio de Economía',
+        shortName: 'Secretaría de Obras Públicas',
+        datasetName: 'Coeficiente de actualización de los Créditos Casa Propia',
+        sourceFile: 'casa-propia.pdf',
+        sourceSha256: 'fixture-hash',
+      },
+      generatedAt: '2026-08-07T00:00:00.000Z',
+      coverage: { from: '2026-01', to: '2026-02' },
+      rowCount: 2,
+      values: [
+        { period: '2026-01', value: 1.02, index: 'CVS' },
+        { period: '2026-02', value: 1.03, index: 'CER' },
+      ],
+    });
+
+    const dataset = await first;
+    expect(dataset.calculationMode).toBe('compound-monthly-coefficients');
+    expect(repository.findPoint(dataset, '2026-02')).toEqual({
+      date: '2026-02',
+      value: 1.03,
+      basis: 'CER',
+    });
   });
 
   it('distinguishes a loaded dataset from a missing point', async () => {

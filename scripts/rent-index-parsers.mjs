@@ -115,11 +115,78 @@ export function parseIpcCsv(text) {
   return values;
 }
 
+const CASA_PROPIA_MONTHS = new Map([
+  ['ene', 1],
+  ['enero', 1],
+  ['feb', 2],
+  ['febrero', 2],
+  ['mar', 3],
+  ['marzo', 3],
+  ['abr', 4],
+  ['abril', 4],
+  ['may', 5],
+  ['mayo', 5],
+  ['jun', 6],
+  ['junio', 6],
+  ['jul', 7],
+  ['julio', 7],
+  ['ago', 8],
+  ['agosto', 8],
+  ['sep', 9],
+  ['sept', 9],
+  ['septiembre', 9],
+  ['oct', 10],
+  ['octubre', 10],
+  ['nov', 11],
+  ['noviembre', 11],
+  ['dic', 12],
+  ['diciembre', 12],
+]);
+
+export function parseCasaPropiaText(text) {
+  const normalizedText = String(text).replace(/\u00a0/g, ' ');
+  const normalizedLower = normalizedText.toLocaleLowerCase('es');
+  const requiredLabels = [
+    'coeficiente de actualización de los créditos casa propia',
+    'mes',
+    'coeficiente',
+    'indice',
+    'fórmula',
+  ];
+  for (const label of requiredLabels) {
+    if (!normalizedLower.includes(label)) {
+      throw new Error(`Casa Propia: no se encontró la etiqueta requerida “${label}”.`);
+    }
+  }
+
+  const values = [];
+  for (const [offset, rawLine] of normalizedText.split(/\r?\n/).entries()) {
+    const line = rawLine.replace(/\s+/g, ' ').trim();
+    const row = parseCasaPropiaLine(line, offset + 1);
+    if (row) {
+      values.push(row);
+      continue;
+    }
+    if (/^(?:Casa Propia\s+)?[a-záéíóú]{3,10}(?:-|\s+)\d{2,4}\b/i.test(line)) {
+      throw new Error(`Casa Propia: fila incompleta o inválida en la línea ${offset + 1}: ${line}`);
+    }
+  }
+
+  const formulaMarkers = normalizedText.match(/Casa Propia/gi)?.length ?? 0;
+  if (formulaMarkers < values.length) {
+    throw new Error('Casa Propia: la columna Fórmula no identifica todas las observaciones.');
+  }
+
+  values.sort((left, right) => left.period.localeCompare(right.period));
+  validatePoints(values, 'period', ISO_PERIOD, 'CASA PROPIA');
+  return values;
+}
+
 export function validateDataset(dataset) {
   if (dataset.schemaVersion !== 1) {
     throw new Error(`Versión de esquema no soportada para ${dataset.type}.`);
   }
-  if (!['icl', 'ipc'].includes(dataset.type)) {
+  if (!['icl', 'ipc', 'casa-propia'].includes(dataset.type)) {
     throw new Error('Tipo de dataset inválido.');
   }
   const key = dataset.type === 'icl' ? 'date' : 'period';
@@ -138,6 +205,37 @@ export function validateDataset(dataset) {
   if (!dataset.source?.sourceFile || !dataset.source?.sourceSha256) {
     throw new Error(`Falta proveniencia en el dataset ${dataset.type}.`);
   }
+  if (
+    dataset.type === 'casa-propia' &&
+    dataset.calculationMode !== 'compound-monthly-coefficients'
+  ) {
+    throw new Error('Casa Propia: calculationMode inválido o ausente.');
+  }
+}
+
+function parseCasaPropiaLine(line, sourceLine) {
+  const match = /^(?:Casa Propia\s+)?([a-záéíóú]{3,10})(?:-|\s+)(\d{2}|\d{4})\s+([^\s]+)\s+(CVS|CER)(?:\s+Casa Propia)?$/i.exec(
+    line,
+  );
+  if (!match) {
+    return null;
+  }
+
+  const monthName = match[1].toLocaleLowerCase('es');
+  const month = CASA_PROPIA_MONTHS.get(monthName);
+  if (!month) {
+    throw new Error(`Casa Propia: mes inválido en la línea ${sourceLine}: ${match[1]}`);
+  }
+  const year = match[2].length === 2 ? 2000 + Number(match[2]) : Number(match[2]);
+  if (!Number.isInteger(year) || year < 2000 || year > 2099) {
+    throw new Error(`Casa Propia: año inválido en la línea ${sourceLine}: ${match[2]}`);
+  }
+
+  return {
+    period: `${year}-${String(month).padStart(2, '0')}`,
+    value: parsePositiveNumber(match[3], `Casa Propia línea ${sourceLine}`),
+    index: match[4].toUpperCase(),
+  };
 }
 
 function parseIclDate(value) {

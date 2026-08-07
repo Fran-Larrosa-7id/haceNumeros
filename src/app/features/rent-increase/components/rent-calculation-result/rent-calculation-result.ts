@@ -38,14 +38,14 @@ export class RentCalculationResultCard {
   }
 
   protected formatCoefficient(value: number): string {
-    return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 4 }).format(value);
+    return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 8 }).format(value);
   }
 
   protected updateLabel(result: RentCalculationResult): string {
     if (!result.updatedAt) {
       return 'No corresponde';
     }
-    return result.method === 'ipc'
+    return result.method === 'ipc' || result.method === 'casa-propia'
       ? new Intl.DateTimeFormat('es-AR', {
           month: 'long',
           year: 'numeric',

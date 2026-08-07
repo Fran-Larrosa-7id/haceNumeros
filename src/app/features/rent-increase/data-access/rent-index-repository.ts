@@ -36,19 +36,25 @@ interface StaticIpcDataset extends StaticDatasetBase {
   readonly values: readonly { readonly period: string; readonly value: number }[];
 }
 
+interface StaticCasaPropiaDataset extends StaticDatasetBase {
+  readonly type: 'casa-propia';
+  readonly calculationMode: 'compound-monthly-coefficients';
+  readonly values: readonly {
+    readonly period: string;
+    readonly value: number;
+    readonly index: 'CVS' | 'CER';
+  }[];
+}
+
 const RENT_INDEX_DATA_PATH = 'data/rent-indexes';
 
 @Injectable({ providedIn: 'root' })
 export class RentIndexRepository {
   private readonly http = inject(HttpClient);
-  private readonly datasetCache = new Map<IndexedRentType, Promise<RentIndexDataset | null>>();
+  private readonly datasetCache = new Map<IndexedRentType, Promise<RentIndexDataset>>();
   private manifestRequest: Promise<RentIndexManifest> | null = null;
 
-  getDataset(type: IndexedRentType): Promise<RentIndexDataset | null> {
-    if (type === 'casa-propia') {
-      return Promise.resolve(null);
-    }
-
+  getDataset(type: IndexedRentType): Promise<RentIndexDataset> {
     const cached = this.datasetCache.get(type);
     if (cached) {
       return cached;
@@ -78,7 +84,7 @@ export class RentIndexRepository {
     return dataset.values.find((point) => point.date === date) ?? null;
   }
 
-  private async fetchDataset(type: 'icl' | 'ipc'): Promise<RentIndexDataset> {
+  private async fetchDataset(type: IndexedRentType): Promise<RentIndexDataset> {
     if (type === 'icl') {
       const dataset = await firstValueFrom(
         this.http.get<StaticIclDataset>(`${RENT_INDEX_DATA_PATH}/icl.json`),
@@ -90,23 +96,43 @@ export class RentIndexRepository {
       );
     }
 
+    if (type === 'ipc') {
+      const dataset = await firstValueFrom(
+        this.http.get<StaticIpcDataset>(`${RENT_INDEX_DATA_PATH}/ipc.json`),
+      );
+      this.assertStaticDataset(dataset, 'ipc');
+      return this.toDomainDataset(
+        dataset,
+        dataset.values.map((point) => ({ date: point.period, value: point.value })),
+      );
+    }
+
     const dataset = await firstValueFrom(
-      this.http.get<StaticIpcDataset>(`${RENT_INDEX_DATA_PATH}/ipc.json`),
+      this.http.get<StaticCasaPropiaDataset>(`${RENT_INDEX_DATA_PATH}/casa-propia.json`),
     );
-    this.assertStaticDataset(dataset, 'ipc');
+    this.assertStaticDataset(dataset, 'casa-propia');
+    if (dataset.calculationMode !== 'compound-monthly-coefficients') {
+      throw new Error('El dataset CASA PROPIA no declara el cálculo acumulativo esperado.');
+    }
     return this.toDomainDataset(
       dataset,
-      dataset.values.map((point) => ({ date: point.period, value: point.value })),
+      dataset.values.map((point) => ({
+        date: point.period,
+        value: point.value,
+        basis: point.index,
+      })),
     );
   }
 
   private toDomainDataset(
-    dataset: StaticIclDataset | StaticIpcDataset,
+    dataset: StaticIclDataset | StaticIpcDataset | StaticCasaPropiaDataset,
     values: readonly RentIndexPoint[],
   ): RentIndexDataset {
     return {
       type: dataset.type,
       frequency: dataset.frequency,
+      calculationMode:
+        dataset.type === 'casa-propia' ? dataset.calculationMode : undefined,
       sourceName: dataset.source.organization,
       sourceShortName: dataset.source.shortName,
       sourceFile: dataset.source.sourceFile,
@@ -118,8 +144,8 @@ export class RentIndexRepository {
   }
 
   private assertStaticDataset(
-    dataset: StaticIclDataset | StaticIpcDataset,
-    expectedType: 'icl' | 'ipc',
+    dataset: StaticIclDataset | StaticIpcDataset | StaticCasaPropiaDataset,
+    expectedType: IndexedRentType,
   ): void {
     if (
       dataset.schemaVersion !== 1 ||

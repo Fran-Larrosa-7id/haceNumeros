@@ -1,5 +1,5 @@
 import {
-  IndexedRentType,
+  RatioRentIndexType,
   RentCalculationResult,
   RentIndexDataset,
   RentIndexPoint,
@@ -7,17 +7,30 @@ import {
 
 export interface IndexedCalculationInput {
   readonly currentRent: number;
-  readonly type: IndexedRentType;
+  readonly type: RatioRentIndexType;
   readonly initialPoint: RentIndexPoint;
   readonly finalPoint: RentIndexPoint;
   readonly dataset: RentIndexDataset;
 }
 
-const INDEX_LABELS: Readonly<Record<IndexedRentType, string>> = {
+const INDEX_LABELS: Readonly<Record<RatioRentIndexType, string>> = {
   icl: 'ICL',
   ipc: 'IPC',
-  'casa-propia': 'Casa Propia',
 };
+
+export interface CasaPropiaCalculationInput {
+  readonly currentRent: number;
+  readonly startPeriod: string;
+  readonly endPeriod: string;
+  readonly dataset: RentIndexDataset;
+}
+
+export class MissingCasaPropiaPeriodsError extends Error {
+  constructor(readonly periods: readonly string[]) {
+    super(`Faltan coeficientes de Casa Propia para: ${periods.join(', ')}.`);
+    this.name = 'MissingCasaPropiaPeriodsError';
+  }
+}
 
 function assertPositiveFinite(value: number, field: string): void {
   if (!Number.isFinite(value) || value <= 0) {
@@ -75,6 +88,65 @@ export function calculateIndexedIncrease(input: IndexedCalculationInput): RentCa
     updatedAt: input.dataset.updatedAt,
     initialPoint: input.initialPoint,
     finalPoint: input.finalPoint,
+  };
+}
+
+export function getCasaPropiaPeriods(startPeriod: string, endPeriod: string): string[] {
+  const pattern = /^(\d{4})-(0[1-9]|1[0-2])$/;
+  const start = pattern.exec(startPeriod);
+  const end = pattern.exec(endPeriod);
+  if (!start || !end) {
+    throw new RangeError('Los períodos de Casa Propia deben tener formato AAAA-MM.');
+  }
+
+  const startIndex = Number(start[1]) * 12 + Number(start[2]) - 1;
+  const endIndex = Number(end[1]) * 12 + Number(end[2]) - 1;
+  if (endIndex < startIndex) {
+    throw new RangeError('El mes final no puede ser anterior al mes inicial.');
+  }
+
+  return Array.from({ length: endIndex - startIndex + 1 }, (_, offset) => {
+    const index = startIndex + offset;
+    const year = Math.floor(index / 12);
+    const month = (index % 12) + 1;
+    return `${year}-${String(month).padStart(2, '0')}`;
+  });
+}
+
+export function calculateCasaPropiaIncrease(
+  input: CasaPropiaCalculationInput,
+): RentCalculationResult {
+  assertPositiveFinite(input.currentRent, 'El alquiler');
+  if (input.dataset.type !== 'casa-propia') {
+    throw new TypeError('Se requiere el dataset de Casa Propia.');
+  }
+
+  const periods = getCasaPropiaPeriods(input.startPeriod, input.endPeriod);
+  const pointsByPeriod = new Map(input.dataset.values.map((point) => [point.date, point]));
+  const missingPeriods = periods.filter((period) => !pointsByPeriod.has(period));
+  if (missingPeriods.length > 0) {
+    throw new MissingCasaPropiaPeriodsError(missingPeriods);
+  }
+
+  const points = periods.map((period) => pointsByPeriod.get(period)!);
+  let coefficient = 1;
+  for (const point of points) {
+    assertPositiveFinite(point.value, `El coeficiente de ${point.date}`);
+    coefficient *= point.value;
+  }
+  const newRent = input.currentRent * coefficient;
+
+  return {
+    currentRent: input.currentRent,
+    newRent,
+    monthlyDifference: newRent - input.currentRent,
+    accumulatedPercentage: (coefficient - 1) * 100,
+    coefficient,
+    method: 'casa-propia',
+    methodLabel: 'Casa Propia',
+    sourceName: input.dataset.sourceName,
+    updatedAt: input.dataset.updatedAt,
+    casaPropiaPeriods: points,
   };
 }
 
