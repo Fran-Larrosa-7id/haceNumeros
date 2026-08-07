@@ -63,6 +63,11 @@ describe('HomePage SEO', () => {
         (link) => link.getAttribute('href') === '/calculadora-sueldo-bruto-neto',
       ),
     ).toBe(true);
+    expect(
+      Array.from(body.querySelectorAll<HTMLAnchorElement>('a')).some(
+        (link) => link.getAttribute('href') === '/calculadora-aguinaldo',
+      ),
+    ).toBe(true);
   });
 
   function metaContent(name: string): string | null {

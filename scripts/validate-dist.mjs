@@ -9,6 +9,7 @@ const indexableUrls = [
   `${siteOrigin}/`,
   `${siteOrigin}/calculadora-aumento-alquiler`,
   `${siteOrigin}/calculadora-sueldo-bruto-neto`,
+  `${siteOrigin}/calculadora-aguinaldo`,
 ];
 
 try {
@@ -25,6 +26,12 @@ try {
     indexableUrls[2],
     'BreadcrumbList',
     /sueldo/i,
+  );
+  const sacCalculator = validatePage(
+    path.join('calculadora-aguinaldo', 'index.html'),
+    indexableUrls[3],
+    'BreadcrumbList',
+    /aguinaldo/i,
   );
 
   for (const file of [
@@ -50,10 +57,16 @@ try {
   validateSitemap();
   validateRobots();
   validateNotFound();
-  validateInternalNavigation(home.html, calculator.html, salaryCalculator.html);
+  validateInternalNavigation(home.html, calculator.html, salaryCalculator.html, sacCalculator.html);
   if (
-    new Set([home.title, calculator.title, salaryCalculator.title]).size !== 3 ||
-    new Set([home.description, calculator.description, salaryCalculator.description]).size !== 3
+    new Set([home.title, calculator.title, salaryCalculator.title, sacCalculator.title]).size !==
+      4 ||
+    new Set([
+      home.description,
+      calculator.description,
+      salaryCalculator.description,
+      sacCalculator.description,
+    ]).size !== 4
   ) {
     throw new Error('Home y calculadora deben tener titles y descriptions únicos.');
   }
@@ -197,12 +210,15 @@ function validateNotFound() {
   }
 }
 
-function validateInternalNavigation(homeHtml, calculatorHtml, salaryHtml) {
+function validateInternalNavigation(homeHtml, calculatorHtml, salaryHtml, sacHtml) {
   if (!findTag(homeHtml, 'a', { href: '/calculadora-aumento-alquiler' })) {
     throw new Error('La home no enlaza internamente a la calculadora publicada.');
   }
   if (!findTag(homeHtml, 'a', { href: '/calculadora-sueldo-bruto-neto' })) {
     throw new Error('La home no enlaza internamente a la calculadora salarial.');
+  }
+  if (!findTag(homeHtml, 'a', { href: '/calculadora-aguinaldo' })) {
+    throw new Error('La home no enlaza internamente a la calculadora de aguinaldo.');
   }
   if (!findTag(calculatorHtml, 'a', { href: '/' })) {
     throw new Error('La calculadora no ofrece navegación interna hacia la home.');
@@ -218,6 +234,16 @@ function validateInternalNavigation(homeHtml, calculatorHtml, salaryHtml) {
   }
   if (!findTag(salaryHtml, 'section', { id: 'metodologia' })) {
     throw new Error('La calculadora salarial no contiene su metodologÃ­a.');
+  }
+  if (
+    !findTag(sacHtml, 'a', { href: '/' }) ||
+    !findTag(sacHtml, 'a', { href: '/calculadora-sueldo-bruto-neto' }) ||
+    !findTag(sacHtml, 'a', { href: '/calculadora-aumento-alquiler' })
+  ) {
+    throw new Error('La calculadora de aguinaldo no contiene la navegación interna esperada.');
+  }
+  if (!findTag(sacHtml, 'section', { id: 'metodologia' })) {
+    throw new Error('La calculadora de aguinaldo no contiene su metodología.');
   }
 }
 

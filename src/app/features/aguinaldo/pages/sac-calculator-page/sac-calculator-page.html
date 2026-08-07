@@ -1,0 +1,199 @@
+<main id="contenido" class="pb-20">
+  <div class="mx-auto max-w-site px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+    <nav aria-label="Migas de pan" class="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <a routerLink="/" class="hover:text-primary">Inicio</a>
+      <app-icon name="chevron" class="size-4 text-subtle" />
+      <span>Dinero y trabajo</span>
+      <app-icon name="chevron" class="size-4 text-subtle" />
+      <span aria-current="page" class="font-semibold text-ink">Aguinaldo</span>
+    </nav>
+
+    <div class="mt-9 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-4xl">
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+            >Argentina</span
+          >
+          <span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+            >Sueldo Anual Complementario</span
+          >
+        </div>
+        <h1
+          class="mt-5 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl"
+        >
+          Calculadora de aguinaldo en Argentina
+        </h1>
+        <p class="mt-4 max-w-3xl text-lg leading-8 text-muted">
+          Calculá cuánto te corresponde cobrar de aguinaldo y estimá el proporcional si no
+          trabajaste todo el semestre.
+        </p>
+      </div>
+      <a
+        href="#metodologia"
+        class="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-primary/20 bg-primary-pale px-4 text-sm font-bold text-primary"
+      >
+        <app-icon name="shield" class="size-5" />Fuentes oficiales
+      </a>
+    </div>
+  </div>
+
+  <section
+    aria-label="Calculadora y resultado"
+    class="mx-auto grid max-w-site gap-6 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8"
+  >
+    <div class="lg:col-span-7">
+      <app-sac-calculator-form
+        (calculateRequested)="calculate($event)"
+        (invalidSubmitted)="showInvalidState()"
+        (cleared)="clearResult()"
+      />
+    </div>
+    <div class="lg:col-span-5">
+      <app-sac-calculation-result
+        [state]="calculationState()"
+        [copyFeedback]="copyFeedback()"
+        (copyRequested)="copyResult()"
+        (shareRequested)="shareResult()"
+      />
+    </div>
+  </section>
+
+  <div class="mx-auto mt-8 max-w-site px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex min-h-24 items-center justify-center rounded-card border border-dashed border-border bg-surface-muted px-6 text-center text-xs uppercase tracking-widest text-subtle"
+      aria-label="Espacio reservado para publicidad futura"
+    >
+      Espacio publicitario
+    </aside>
+  </div>
+
+  <div class="mx-auto mt-12 max-w-site space-y-10 px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex items-start gap-4 rounded-card border border-primary/20 bg-primary-pale p-5 sm:p-6"
+    >
+      <app-icon name="info" class="mt-1 shrink-0 text-primary" />
+      <div>
+        <h2 class="font-display text-xl font-bold text-ink">El resultado es bruto y orientativo</h2>
+        <p class="mt-2 leading-7 text-muted">
+          La liquidación real puede incluir descuentos y particularidades laborales que esta
+          estimación no conoce. No reemplaza el recibo ni el asesoramiento profesional.
+        </p>
+      </div>
+    </aside>
+
+    <section class="grid gap-5 md:grid-cols-2">
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Cómo se calcula el aguinaldo?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          El SAC de un semestre completo equivale al 50 % de la mayor remuneración mensual
+          computable devengada dentro de ese semestre.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Qué sueldo se toma?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Se usa la mejor remuneración mensual bruta computable, no el sueldo neto. Si cargás los
+          seis meses, elegimos automáticamente la mayor y mostramos a qué mes corresponde.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Qué es el medio aguinaldo?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Es cada una de las dos cuotas en las que se paga el Sueldo Anual Complementario. Para un
+          semestre completo, cada cuota representa la mitad de la mejor remuneración mensual
+          computable del período.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Aguinaldo proporcional</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Para esta estimación multiplicamos el medio aguinaldo por los días calendario inclusivos
+          del período y lo dividimos por los días reales del semestre. No usamos un divisor fijo de
+          180 días.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Fechas de pago</h2>
+        <p class="mt-3 leading-7 text-muted">
+          La primera cuota vence el <strong class="text-ink">{{ paymentDates.first }}</strong> y la
+          segunda el <strong class="text-ink">{{ paymentDates.second }}</strong
+          >. En diciembre puede estimarse el mes y ajustarse después la diferencia.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Bruto o neto?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          La calculadora devuelve un aguinaldo bruto. No intenta calcular Ganancias ni aportes y
+          descuentos personales, por lo que el importe depositado puede ser menor.
+        </p>
+      </article>
+    </section>
+
+    <section
+      id="metodologia"
+      class="scroll-mt-24 rounded-card border border-border bg-white p-6 shadow-soft sm:p-8"
+    >
+      <h2 class="font-display text-2xl font-bold text-ink">Metodología y fuentes oficiales</h2>
+      <p class="mt-4 leading-7 text-muted">
+        La fórmula general aplica el 50 % sobre la mejor remuneración mensual computable. El modo
+        proporcional usa días calendario reales del semestre seleccionado, incluidos los años
+        bisiestos. Es una aproximación transparente: en una extinción del contrato u otras
+        situaciones, la liquidación legal concreta puede requerir criterios adicionales.
+      </p>
+      <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+        @for (source of sources; track source.url) {
+          <li>
+            <a
+              [href]="source.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-bold text-primary hover:underline"
+              >{{ source.name }}</a
+            >
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="mx-auto w-full max-w-3xl">
+      <div class="text-center">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Información útil</p>
+        <h2 class="mt-3 font-display text-3xl font-bold text-ink">Preguntas frecuentes</h2>
+      </div>
+      <div class="mt-8 space-y-3">
+        @for (faq of faqs; track faq.question) {
+          <details class="group rounded-xl border border-border bg-white shadow-soft">
+            <summary
+              class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 p-5 font-display font-bold text-ink [&::-webkit-details-marker]:hidden"
+            >
+              {{ faq.question
+              }}<app-icon
+                name="chevron"
+                class="size-5 rotate-90 text-primary transition-transform group-open:-rotate-90"
+              />
+            </summary>
+            <p class="px-5 pb-5 leading-7 text-muted">{{ faq.answer }}</p>
+          </details>
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="font-display text-2xl font-bold text-ink">Herramientas relacionadas</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        <a
+          routerLink="/calculadora-sueldo-bruto-neto"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Calculadora de sueldo bruto a neto</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        >
+        <a
+          routerLink="/calculadora-aumento-alquiler"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Calculadora de aumento de alquiler</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        >
+      </div>
+    </section>
+  </div>
+</main>

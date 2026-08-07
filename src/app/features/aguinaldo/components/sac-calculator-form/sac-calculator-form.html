@@ -1,0 +1,208 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="rounded-card border border-border bg-white p-5 shadow-soft sm:p-7"
+  novalidate
+>
+  <div class="grid gap-5 sm:grid-cols-[1fr_10rem]">
+    <fieldset>
+      <legend class="font-bold text-ink">Semestre a calcular</legend>
+      <div class="mt-2 grid grid-cols-2 rounded-xl bg-primary-pale p-1">
+        <button
+          type="button"
+          class="min-h-11 rounded-lg px-3 font-bold transition"
+          [class.bg-white]="semester() === 'first'"
+          [class.text-primary]="semester() === 'first'"
+          [attr.aria-pressed]="semester() === 'first'"
+          (click)="changeSemester('first')"
+        >
+          Enero – Junio
+        </button>
+        <button
+          type="button"
+          class="min-h-11 rounded-lg px-3 font-bold transition"
+          [class.bg-white]="semester() === 'second'"
+          [class.text-primary]="semester() === 'second'"
+          [attr.aria-pressed]="semester() === 'second'"
+          (click)="changeSemester('second')"
+        >
+          Julio – Diciembre
+        </button>
+      </div>
+    </fieldset>
+    <div>
+      <label for="sac-year" class="font-bold text-ink">Año</label>
+      <select
+        id="sac-year"
+        formControlName="year"
+        class="mt-2 min-h-12 w-full rounded-xl border border-border bg-white px-3 text-ink outline-none focus:border-primary focus:ring-4 focus:ring-primary/15"
+        (change)="resetDependentValues()"
+      >
+        @for (year of yearOptions; track year) {
+          <option [ngValue]="year">{{ year }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <fieldset class="mt-7">
+    <legend class="font-bold text-ink">¿Trabajaste el semestre completo?</legend>
+    <div class="mt-2 grid gap-3 sm:grid-cols-2">
+      <button
+        type="button"
+        class="min-h-14 rounded-xl border px-4 text-left font-semibold transition"
+        [class.border-primary]="workPeriodMode() === 'full-semester'"
+        [class.bg-primary-pale]="workPeriodMode() === 'full-semester'"
+        [attr.aria-pressed]="workPeriodMode() === 'full-semester'"
+        (click)="changeWorkPeriodMode('full-semester')"
+      >
+        Sí, semestre completo
+      </button>
+      <button
+        type="button"
+        class="min-h-14 rounded-xl border px-4 text-left font-semibold transition"
+        [class.border-primary]="workPeriodMode() === 'proportional'"
+        [class.bg-primary-pale]="workPeriodMode() === 'proportional'"
+        [attr.aria-pressed]="workPeriodMode() === 'proportional'"
+        (click)="changeWorkPeriodMode('proportional')"
+      >
+        No, calcular proporcional
+      </button>
+    </div>
+  </fieldset>
+
+  @if (workPeriodMode() === 'proportional') {
+    <div class="mt-6 rounded-xl border border-border bg-surface-muted p-4">
+      <p class="text-sm leading-6 text-muted">
+        Indicá el período que querés estimar dentro del semestre seleccionado:
+        {{ semesterBounds().startDate }} al {{ semesterBounds().endDate }}.
+      </p>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="sac-start-date" class="font-bold text-ink">Fecha de inicio</label
+          ><app-date-picker
+            inputId="sac-start-date"
+            formControlName="startDate"
+            [invalid]="hasError('startDate') || !!dateRangeError()"
+            describedBy="sac-date-error"
+          />
+        </div>
+        <div>
+          <label for="sac-end-date" class="font-bold text-ink">Fecha de fin</label
+          ><app-date-picker
+            inputId="sac-end-date"
+            formControlName="endDate"
+            [invalid]="hasError('endDate') || !!dateRangeError()"
+            describedBy="sac-date-error"
+          />
+        </div>
+      </div>
+      @if (hasError('startDate') || hasError('endDate')) {
+        <p id="sac-date-error" class="mt-2 text-sm text-red-700">Elegí ambas fechas.</p>
+      } @else if (dateRangeError()) {
+        <p id="sac-date-error" class="mt-2 text-sm text-red-700">{{ dateRangeError() }}</p>
+      }
+    </div>
+  }
+
+  <div class="mt-7 border-t border-border pt-6">
+    @if (inputMode() === 'manual-best') {
+      <label for="sac-best-remuneration" class="font-bold text-ink"
+        >Mejor remuneración mensual computable del semestre</label
+      >
+      <div class="relative mt-2">
+        <span
+          class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 font-bold text-primary"
+          >$</span
+        ><app-money-input
+          inputId="sac-best-remuneration"
+          formControlName="bestRemuneration"
+          [invalid]="hasError('bestRemuneration')"
+          describedBy="sac-best-help sac-best-error"
+          placeholder="Ej.: 2.000.000"
+        />
+      </div>
+      <p id="sac-best-help" class="mt-2 text-sm leading-6 text-muted">
+        Ingresá el importe bruto/remunerativo que corresponda computar para el SAC, antes de
+        descuentos personales.
+      </p>
+      @if (hasError('bestRemuneration')) {
+        <p id="sac-best-error" class="mt-2 text-sm text-red-700">
+          Ingresá una remuneración mayor a cero.
+        </p>
+      }
+      <button
+        type="button"
+        class="mt-4 inline-flex min-h-11 items-center gap-2 font-bold text-primary hover:underline"
+        (click)="changeInputMode('monthly-values')"
+      >
+        <span aria-hidden="true">⊕</span>Cargar los 6 meses
+      </button>
+    } @else {
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="font-display text-xl font-bold text-ink">Remuneraciones del semestre</h2>
+          <p class="mt-1 text-sm text-muted">
+            Encontraremos automáticamente la mayor. En un empate se muestra el primer mes.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="min-h-11 self-start font-bold text-primary hover:underline"
+          (click)="changeInputMode('manual-best')"
+        >
+          Ingresar mejor remuneración manualmente
+        </button>
+      </div>
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        @for (slot of monthSlots(); track slot.month) {
+          <div>
+            <label [for]="'sac-month-' + slot.month" class="font-bold text-ink">{{
+              slot.label
+            }}</label>
+            <div class="relative mt-2">
+              <span
+                class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 font-bold text-primary"
+                >$</span
+              ><app-money-input
+                [inputId]="'sac-month-' + slot.month"
+                [formControl]="monthlyControl(slot.index)"
+                placeholder="0"
+              />
+            </div>
+          </div>
+        }
+      </div>
+      @if (monthlyError()) {
+        <p class="mt-3 text-sm text-red-700">Ingresá al menos una remuneración mensual positiva.</p>
+      }
+    }
+  </div>
+
+  @if (semester() === 'second') {
+    <aside class="mt-6 flex gap-3 rounded-xl border-l-4 border-primary bg-primary-pale p-4">
+      <app-icon name="info" class="mt-0.5 text-primary" />
+      <p class="text-sm leading-6 text-muted">
+        La segunda cuota vence el <strong class="text-ink">{{ paymentDate() }}</strong
+        >. El empleador puede estimar la remuneración de diciembre y ajustar luego la diferencia si
+        el monto devengado resulta distinto.
+      </p>
+    </aside>
+  }
+
+  <div class="mt-7 grid gap-3 sm:grid-cols-[1fr_auto]">
+    <button
+      type="submit"
+      class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-bold text-white hover:bg-primary-hover"
+    >
+      <app-icon name="calculator" />Calcular aguinaldo
+    </button>
+    <button
+      type="button"
+      class="min-h-14 rounded-xl border-2 border-primary px-6 font-bold text-primary hover:bg-primary-pale"
+      (click)="reset()"
+    >
+      Limpiar
+    </button>
+  </div>
+</form>

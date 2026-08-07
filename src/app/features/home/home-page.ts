@@ -69,10 +69,11 @@ export class HomePage {
       icon: 'receipt',
     },
     {
-      title: 'Aguinaldo',
+      title: 'Calculadora de aguinaldo',
       description: 'Estimá cuánto te correspondería cobrar de Sueldo Anual Complementario.',
       category: 'Dinero y trabajo',
       icon: 'calendar',
+      route: '/calculadora-aguinaldo',
     },
     {
       title: 'Comisiones de Mercado Libre',
@@ -194,6 +195,7 @@ export class HomePage {
   protected categoryToolRoute(tool: string): string | null {
     if (tool === 'Aumento de alquiler') return '/calculadora-aumento-alquiler';
     if (tool === 'Sueldo bruto a neto') return '/calculadora-sueldo-bruto-neto';
+    if (tool === 'Aguinaldo') return '/calculadora-aguinaldo';
     return null;
   }
 

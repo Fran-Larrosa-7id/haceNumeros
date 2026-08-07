@@ -21,6 +21,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'calculadora-aguinaldo',
+    loadComponent: () =>
+      import('./features/aguinaldo/pages/sac-calculator-page/sac-calculator-page').then(
+        (component) => component.SacCalculatorPage,
+      ),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found-page').then((component) => component.NotFoundPage),

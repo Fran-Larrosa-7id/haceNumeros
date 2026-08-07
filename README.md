@@ -83,6 +83,7 @@ clics, CTR y posición media. Usar por separado:
 
 - `https://hacenumeros.com/calculadora-aumento-alquiler`
 - `https://hacenumeros.com/calculadora-sueldo-bruto-neto`
+- `https://hacenumeros.com/calculadora-aguinaldo`
 
 Las frases definidas en el contenido son intenciones objetivo, no consultas que ya estén
 posicionando. Hasta que Search Console tenga datos suficientes, no se deben inventar resultados ni
@@ -102,6 +103,6 @@ conclusiones.
 10. Publicar mediante un push a `main` y comprobar el deploy de Pages.
 11. Inspeccionar la URL y solicitar indexación manualmente en Search Console.
 
-Con sólo tres páginas indexables, el sitemap continúa deliberadamente estático. Al agregar una nueva
+Con sólo cuatro páginas indexables, el sitemap continúa deliberadamente estático. Al agregar una nueva
 calculadora deben actualizarse conjuntamente ruta, metadata, enlace interno, sitemap y validador de
 distribución.
