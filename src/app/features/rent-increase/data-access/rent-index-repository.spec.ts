@@ -23,7 +23,7 @@ describe('RentIndexRepository', () => {
     const second = repository.getDataset('icl');
     expect(first).toBe(second);
 
-    http.expectOne('/data/rent-indexes/icl.json').flush({
+    http.expectOne('data/rent-indexes/icl.json').flush({
       schemaVersion: 1,
       type: 'icl',
       frequency: 'daily',
@@ -50,7 +50,7 @@ describe('RentIndexRepository', () => {
 
   it('maps IPC monthly periods to domain lookup keys', async () => {
     const request = repository.getDataset('ipc');
-    http.expectOne('/data/rent-indexes/ipc.json').flush({
+    http.expectOne('data/rent-indexes/ipc.json').flush({
       schemaVersion: 1,
       type: 'ipc',
       frequency: 'monthly',

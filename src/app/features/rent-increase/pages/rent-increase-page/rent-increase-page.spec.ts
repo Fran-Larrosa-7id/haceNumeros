@@ -44,7 +44,7 @@ describe('RentIncreasePage', () => {
     setControlValue('#last-adjustment', '2025-01-01');
     setControlValue('#next-adjustment', '2026-01-01');
     submit();
-    http.expectOne('/data/rent-indexes/icl.json').flush(
+    http.expectOne('data/rent-indexes/icl.json').flush(
       datasetFixture('icl', [
         { date: '2025-01-01', value: 10 },
         { date: '2026-01-01', value: 15 },
@@ -62,7 +62,7 @@ describe('RentIncreasePage', () => {
     setControlValue('#last-adjustment', '2025-01');
     setControlValue('#next-adjustment', '2026-01');
     submit();
-    http.expectOne('/data/rent-indexes/ipc.json').flush(
+    http.expectOne('data/rent-indexes/ipc.json').flush(
       datasetFixture('ipc', [
         { period: '2025-01', value: 100 },
         { period: '2026-01', value: 125 },
@@ -79,7 +79,7 @@ describe('RentIncreasePage', () => {
     setControlValue('#last-adjustment', '2025-01-02');
     setControlValue('#next-adjustment', '2026-01-02');
     submit();
-    http.expectOne('/data/rent-indexes/icl.json').flush(
+    http.expectOne('data/rent-indexes/icl.json').flush(
       datasetFixture('icl', [
         { date: '2025-01-01', value: 10 },
         { date: '2026-01-01', value: 15 },
@@ -97,7 +97,7 @@ describe('RentIncreasePage', () => {
     setControlValue('#last-adjustment', '2025-01');
     setControlValue('#next-adjustment', '2026-01');
     submit();
-    http.expectOne('/data/rent-indexes/ipc.json').error(new ProgressEvent('network error'));
+    http.expectOne('data/rent-indexes/ipc.json').error(new ProgressEvent('network error'));
     await detectAsyncChanges();
 
     expect(resultCard().textContent).toContain('Error de carga');
@@ -146,7 +146,7 @@ describe('RentIncreasePage', () => {
   }
 
   function flushManifestIfRequested(): void {
-    const requests = http.match('/data/rent-indexes/manifest.json');
+    const requests = http.match('data/rent-indexes/manifest.json');
     for (const request of requests) {
       request.flush({
         schemaVersion: 1,

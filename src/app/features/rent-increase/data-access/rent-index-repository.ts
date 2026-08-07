@@ -36,6 +36,8 @@ interface StaticIpcDataset extends StaticDatasetBase {
   readonly values: readonly { readonly period: string; readonly value: number }[];
 }
 
+const RENT_INDEX_DATA_PATH = 'data/rent-indexes';
+
 @Injectable({ providedIn: 'root' })
 export class RentIndexRepository {
   private readonly http = inject(HttpClient);
@@ -63,7 +65,7 @@ export class RentIndexRepository {
   getManifest(): Promise<RentIndexManifest> {
     if (!this.manifestRequest) {
       this.manifestRequest = firstValueFrom(
-        this.http.get<RentIndexManifest>('/data/rent-indexes/manifest.json'),
+        this.http.get<RentIndexManifest>(`${RENT_INDEX_DATA_PATH}/manifest.json`),
       ).catch((error: unknown) => {
         this.manifestRequest = null;
         throw error;
@@ -79,7 +81,7 @@ export class RentIndexRepository {
   private async fetchDataset(type: 'icl' | 'ipc'): Promise<RentIndexDataset> {
     if (type === 'icl') {
       const dataset = await firstValueFrom(
-        this.http.get<StaticIclDataset>('/data/rent-indexes/icl.json'),
+        this.http.get<StaticIclDataset>(`${RENT_INDEX_DATA_PATH}/icl.json`),
       );
       this.assertStaticDataset(dataset, 'icl');
       return this.toDomainDataset(
@@ -89,7 +91,7 @@ export class RentIndexRepository {
     }
 
     const dataset = await firstValueFrom(
-      this.http.get<StaticIpcDataset>('/data/rent-indexes/ipc.json'),
+      this.http.get<StaticIpcDataset>(`${RENT_INDEX_DATA_PATH}/ipc.json`),
     );
     this.assertStaticDataset(dataset, 'ipc');
     return this.toDomainDataset(
