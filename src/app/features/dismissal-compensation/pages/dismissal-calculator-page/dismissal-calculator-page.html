@@ -1,0 +1,210 @@
+<main id="contenido" class="pb-20">
+  <div class="mx-auto max-w-site px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+    <nav aria-label="Migas de pan" class="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <a routerLink="/" class="hover:text-primary">Inicio</a>
+      <app-icon name="chevron" class="size-4 text-subtle" />
+      <span>Dinero y trabajo</span>
+      <app-icon name="chevron" class="size-4 text-subtle" />
+      <span aria-current="page" class="font-semibold text-ink">Indemnización por despido</span>
+    </nav>
+
+    <div class="mt-9 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div class="max-w-4xl">
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+            >Argentina</span
+          >
+          <span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+            >Despido sin causa</span
+          >
+        </div>
+        <h1
+          class="mt-5 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl"
+        >
+          Calculadora de indemnización por despido en Argentina
+        </h1>
+        <p class="mt-4 max-w-3xl text-lg leading-8 text-muted">
+          Estimá los principales conceptos indemnizatorios de un despido sin justa causa bajo el
+          régimen general de la Ley de Contrato de Trabajo.
+        </p>
+      </div>
+      <a
+        href="#metodologia"
+        class="inline-flex min-h-11 items-center gap-2 self-start rounded-full border border-primary/20 bg-primary-pale px-4 text-sm font-bold text-primary"
+      >
+        <app-icon name="shield" class="size-5" />Fuentes oficiales
+      </a>
+    </div>
+
+    <aside
+      class="mt-7 flex items-start gap-3 rounded-xl border border-primary/20 bg-primary-pale p-4"
+    >
+      <app-icon name="info" class="mt-0.5 shrink-0 text-primary" />
+      <p class="text-sm leading-6 text-muted">
+        Esta herramienta brinda una estimación general basada en el régimen de la LCT. Convenios
+        colectivos, estatutos especiales, fondos de cese o circunstancias particulares pueden
+        modificar el resultado. Normativa revisada: {{ legalReview }}.
+      </p>
+    </aside>
+  </div>
+
+  <section class="mx-auto max-w-site px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex items-start gap-4 rounded-card border border-border bg-white p-5 shadow-soft sm:p-6"
+    >
+      <span
+        class="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-pale text-primary"
+      >
+        <app-icon name="shield" />
+      </span>
+      <div>
+        <h2 class="font-display text-xl font-bold text-ink">Alcance de esta herramienta</h2>
+        <p class="mt-2 leading-7 text-muted">
+          Diseñada exclusivamente para despidos sin justa causa del régimen general. No aplica para
+          renuncias, despidos con causa, acuerdos, estatutos especiales, casas particulares,
+          construcción, empleo público ni fondos de cese específicos.
+        </p>
+      </div>
+    </aside>
+  </section>
+
+  <section
+    aria-label="Calculadora y resultado"
+    class="mx-auto mt-8 grid max-w-site gap-6 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8"
+  >
+    <div class="lg:col-span-7">
+      <app-dismissal-calculator-form
+        (calculateRequested)="calculate($event)"
+        (invalidSubmitted)="showInvalidState()"
+        (cleared)="clearResult()"
+      />
+    </div>
+    <div class="lg:col-span-5">
+      <app-dismissal-calculation-result
+        [state]="calculationState()"
+        [copyFeedback]="copyFeedback()"
+        (copyRequested)="copyResult()"
+        (shareRequested)="shareResult()"
+      />
+    </div>
+  </section>
+
+  <div class="mx-auto mt-8 max-w-site px-4 sm:px-6 lg:px-8">
+    <aside
+      class="flex min-h-24 items-center justify-center rounded-card border border-dashed border-border bg-surface-muted px-6 text-center text-xs uppercase tracking-widest text-subtle"
+      aria-label="Espacio reservado para publicidad futura"
+    >
+      Espacio publicitario
+    </aside>
+  </div>
+
+  <div class="mx-auto mt-12 max-w-site space-y-10 px-4 sm:px-6 lg:px-8">
+    <section class="grid gap-5 md:grid-cols-2">
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Qué calcula</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Suma indemnización por antigüedad, preaviso sustitutivo e integración del mes cuando
+          corresponde. El total es indemnizatorio, no una liquidación final completa.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Qué no suma</h2>
+        <p class="mt-3 leading-7 text-muted">
+          SAC proporcional, vacaciones proporcionales, salario devengado y otros rubros se muestran
+          aparte porque requieren bases y datos adicionales.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Preaviso e integración</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Fuera del período de prueba, el preaviso es de uno o dos meses según antigüedad real. Para
+          mensualizados, la integración se estima con salario mensual dividido por 30.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Tope y piso</h2>
+        <p class="mt-3 leading-7 text-muted">
+          El tope del convenio es opcional y manual. Si se informa, la base aplicada respeta el piso
+          del 67 % de la remuneración computable.
+        </p>
+      </article>
+    </section>
+
+    <section
+      id="metodologia"
+      class="scroll-mt-24 rounded-card border border-border bg-white p-6 shadow-soft sm:p-8"
+    >
+      <h2 class="font-display text-2xl font-bold text-ink">Metodología y fuentes oficiales</h2>
+      <p class="mt-4 leading-7 text-muted">
+        Esta V1 usa el texto actualizado de la LCT y la Ley 27.802, con revisión normativa fechada
+        el {{ legalReview }}. Para el art. 245 no suma SAC/12 a la base. Para integración del mes,
+        usa una metodología estimativa para personal mensualizado y no la presenta como texto
+        literal de la ley.
+      </p>
+      <p class="mt-4 text-sm font-bold uppercase tracking-widest text-primary">
+        Artículos relevantes
+      </p>
+      <p class="mt-2 text-muted">{{ articles.join(', ') }}</p>
+      <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+        @for (source of sources; track source.url) {
+          <li>
+            <a
+              [href]="source.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-bold text-primary hover:underline"
+              >{{ source.name }}</a
+            >
+          </li>
+        }
+      </ul>
+    </section>
+
+    <section class="mx-auto w-full max-w-3xl">
+      <div class="text-center">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Información útil</p>
+        <h2 class="mt-3 font-display text-3xl font-bold text-ink">Preguntas frecuentes</h2>
+      </div>
+      <div class="mt-8 space-y-3">
+        @for (faq of faqs; track faq.question) {
+          <details class="group rounded-xl border border-border bg-white shadow-soft">
+            <summary
+              class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 p-5 font-display font-bold text-ink focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary [&::-webkit-details-marker]:hidden"
+            >
+              {{ faq.question }}
+              <app-icon
+                name="chevron"
+                class="size-5 rotate-90 text-primary transition-transform group-open:-rotate-90"
+              />
+            </summary>
+            <p class="px-5 pb-5 leading-7 text-muted">{{ faq.answer }}</p>
+          </details>
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="font-display text-2xl font-bold text-ink">Herramientas relacionadas</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-3">
+        <a
+          routerLink="/calculadora-sueldo-bruto-neto"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Calculadora de sueldo bruto a neto</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        >
+        <a
+          routerLink="/calculadora-aguinaldo"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Calculadora de aguinaldo</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        >
+        <a
+          routerLink="/calculadora-aumento-alquiler"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Calculadora de aumento de alquiler</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        >
+      </div>
+    </section>
+  </div>
+</main>

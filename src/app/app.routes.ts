@@ -28,6 +28,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'calculadora-indemnizacion-despido',
+    loadComponent: () =>
+      import('./features/dismissal-compensation/pages/dismissal-calculator-page/dismissal-calculator-page').then(
+        (component) => component.DismissalCalculatorPage,
+      ),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found-page').then((component) => component.NotFoundPage),

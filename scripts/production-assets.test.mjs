@@ -23,6 +23,7 @@ test('production domain and crawler assets are coherent', async () => {
     '<loc>https://hacenumeros.com/calculadora-aumento-alquiler</loc>',
     '<loc>https://hacenumeros.com/calculadora-sueldo-bruto-neto</loc>',
     '<loc>https://hacenumeros.com/calculadora-aguinaldo</loc>',
+    '<loc>https://hacenumeros.com/calculadora-indemnizacion-despido</loc>',
   ]);
   assert.match(index, /<html lang="es">/);
   assert.match(index, /<base href="\/"\s*\/>/);

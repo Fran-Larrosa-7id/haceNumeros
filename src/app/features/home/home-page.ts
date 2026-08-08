@@ -63,10 +63,11 @@ export class HomePage {
       route: '/calculadora-sueldo-bruto-neto',
     },
     {
-      title: 'Monotributo',
-      description: 'Orientate sobre tu categoría y el importe mensual según tu facturación.',
-      category: 'Impuestos y emprendimientos',
-      icon: 'receipt',
+      title: 'Calculadora de indemnización por despido',
+      description: 'Estimá antigüedad, preaviso e integración del mes para un despido sin causa.',
+      category: 'Dinero y trabajo',
+      icon: 'briefcase',
+      route: '/calculadora-indemnizacion-despido',
     },
     {
       title: 'Calculadora de aguinaldo',
@@ -196,6 +197,7 @@ export class HomePage {
     if (tool === 'Aumento de alquiler') return '/calculadora-aumento-alquiler';
     if (tool === 'Sueldo bruto a neto') return '/calculadora-sueldo-bruto-neto';
     if (tool === 'Aguinaldo') return '/calculadora-aguinaldo';
+    if (tool === 'Indemnización por despido') return '/calculadora-indemnizacion-despido';
     return null;
   }
 

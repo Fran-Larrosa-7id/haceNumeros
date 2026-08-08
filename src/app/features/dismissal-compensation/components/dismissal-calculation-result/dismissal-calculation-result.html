@@ -1,0 +1,203 @@
+<aside
+  class="h-full rounded-card border border-primary/25 bg-primary-pale p-5 shadow-soft sm:p-7"
+  aria-labelledby="dismissal-result-title"
+  aria-live="polite"
+>
+  <p class="text-xs font-bold uppercase tracking-widest text-primary">Resultado estimado</p>
+  <h2 id="dismissal-result-title" class="mt-2 font-display text-2xl font-bold text-ink">
+    Indemnización estimada
+  </h2>
+
+  @switch (state().status) {
+    @case ('idle') {
+      <div class="flex min-h-80 flex-col items-center justify-center text-center">
+        <span
+          class="flex size-16 items-center justify-center rounded-2xl bg-white text-primary shadow-soft"
+        >
+          <app-icon name="briefcase" class="size-8" />
+        </span>
+        <p class="mt-5 max-w-sm font-display text-xl font-bold text-ink">
+          Completá tus datos para ver una estimación.
+        </p>
+        <p class="mt-3 max-w-sm text-sm leading-6 text-muted">
+          El resultado no incluye SAC, vacaciones ni salario devengado.
+        </p>
+      </div>
+    }
+    @case ('invalid') {
+      <div class="mt-6 rounded-xl border border-red-200 bg-white p-5">
+        <p class="font-bold text-red-800">Revisá los datos ingresados</p>
+        <p class="mt-2 text-sm text-muted">
+          Corregí los campos indicados y volvé a calcular. No mantenemos resultados anteriores con
+          datos inválidos.
+        </p>
+      </div>
+    }
+    @case ('trial-period') {
+      @if (state().result; as result) {
+        <div class="mt-6 rounded-xl border border-primary/20 bg-white p-5">
+          <p class="font-display text-2xl font-bold text-ink">Período de prueba</p>
+          <p class="mt-3 text-sm leading-6 text-muted">{{ result.message }}</p>
+          <dl class="mt-5 space-y-3 text-sm">
+            <div class="flex justify-between gap-4">
+              <dt>Art. 245</dt>
+              <dd>No incluido</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt>Preaviso</dt>
+              <dd>No incluido</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt>Integración</dt>
+              <dd>No incluida</dd>
+            </div>
+          </dl>
+        </div>
+      }
+    }
+    @case ('termination-fund') {
+      @if (state().result; as result) {
+        <div class="mt-6 rounded-xl border border-primary/20 bg-white p-5">
+          <p class="font-display text-2xl font-bold text-ink">Sistema de cese laboral</p>
+          <p class="mt-3 text-sm leading-6 text-muted">{{ result.message }}</p>
+          <p class="mt-3 text-sm leading-6 text-muted">
+            Esta herramienta no inventa un monto cuando el convenio puede reemplazar el régimen
+            general.
+          </p>
+        </div>
+      }
+    }
+    @case ('success') {
+      @if (state().result; as result) {
+        <ng-container
+          [ngTemplateOutlet]="resultTemplate"
+          [ngTemplateOutletContext]="{ result: result, partial: false }"
+        />
+      }
+    }
+    @case ('partial') {
+      @if (state().result; as result) {
+        <ng-container
+          [ngTemplateOutlet]="resultTemplate"
+          [ngTemplateOutletContext]="{ result: result, partial: true }"
+        />
+      }
+    }
+  }
+
+  <ng-template #resultTemplate let-result="result" let-partial="partial">
+    <div class="mt-6">
+      <p class="text-sm font-bold uppercase tracking-widest text-muted">
+        {{ partial ? 'Total parcial' : 'Total indemnizatorio estimado' }}
+      </p>
+      <p class="mt-2 font-display text-4xl font-extrabold tracking-tight text-primary sm:text-5xl">
+        {{ money(result.totalIndemnity) }}
+      </p>
+      <p class="mt-2 text-sm font-semibold text-muted">{{ result.message }}</p>
+    </div>
+
+    <dl class="mt-7 rounded-xl bg-white p-5 text-sm">
+      <div class="flex justify-between gap-4 py-2">
+        <dt class="text-muted">Indemnización por antigüedad</dt>
+        <dd class="text-right font-bold text-ink">{{ money(result.article245Indemnity) }}</dd>
+      </div>
+      <div class="flex justify-between gap-4 py-2">
+        <dt class="text-muted">Unidades art. 245</dt>
+        <dd class="font-bold text-ink">{{ result.article245Units }}</dd>
+      </div>
+      <div class="flex justify-between gap-4 py-2">
+        <dt class="text-muted">Preaviso sustitutivo</dt>
+        <dd class="text-right font-bold text-ink">
+          {{ result.pendingNotice ? 'Pendiente' : money(result.noticeIndemnity) }}
+        </dd>
+      </div>
+      <div class="flex justify-between gap-4 py-2">
+        <dt class="text-muted">Meses de preaviso</dt>
+        <dd class="font-bold text-ink">{{ result.noticeMonths }}</dd>
+      </div>
+      <div class="flex justify-between gap-4 py-2">
+        <dt class="text-muted">Integración del mes</dt>
+        <dd class="text-right font-bold text-ink">
+          {{ result.pendingNotice ? 'Pendiente' : money(result.monthIntegration) }}
+        </dd>
+      </div>
+      <div class="flex justify-between gap-4 py-2">
+        <dt class="text-muted">Días de integración</dt>
+        <dd class="font-bold text-ink">{{ result.integrationDays }}</dd>
+      </div>
+      <div class="mt-3 flex justify-between gap-4 border-t border-border pt-4">
+        <dt class="font-bold text-ink">{{ partial ? 'Total parcial' : 'Total indemnizatorio' }}</dt>
+        <dd class="text-right font-extrabold text-primary">{{ money(result.totalIndemnity) }}</dd>
+      </div>
+    </dl>
+
+    <div class="mt-5 rounded-xl border border-primary/20 bg-white p-5 text-sm">
+      <p class="font-bold text-ink">Base art. 245</p>
+      <dl class="mt-3 space-y-2">
+        <div class="flex justify-between gap-4">
+          <dt class="text-muted">Base informada</dt>
+          <dd class="font-bold text-ink">{{ money(result.article245Base.rawBase) }}</dd>
+        </div>
+        @if (result.article245Base.cctCap !== null) {
+          <div class="flex justify-between gap-4">
+            <dt class="text-muted">Tope CCT</dt>
+            <dd class="font-bold text-ink">{{ money(result.article245Base.cctCap) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-muted">Piso 67 %</dt>
+            <dd class="font-bold text-ink">{{ money(result.article245Base.floor67) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4">
+            <dt class="text-muted">Base aplicada</dt>
+            <dd class="font-bold text-ink">{{ money(result.article245Base.appliedBase) }}</dd>
+          </div>
+        } @else {
+          <p class="text-muted">
+            Resultado calculado sin tope de convenio. Si tu relación está alcanzada por un CCT, el
+            monto puede variar.
+          </p>
+        }
+      </dl>
+    </div>
+
+    <div class="mt-5 rounded-xl border border-primary/20 bg-white p-5 text-sm">
+      <p class="font-bold text-ink">Otros conceptos de liquidación final que pueden corresponder</p>
+      <dl class="mt-3 space-y-2">
+        <div class="flex justify-between gap-4">
+          <dt>SAC proporcional</dt>
+          <dd>No incluido</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt>Vacaciones proporcionales</dt>
+          <dd>No incluido</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt>Salario devengado</dt>
+          <dd>No incluido</dd>
+        </div>
+        <div class="flex justify-between gap-4">
+          <dt>Otros rubros</dt>
+          <dd>Según el caso</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+      <button
+        type="button"
+        class="min-h-12 rounded-xl border border-primary/30 bg-white px-4 font-bold text-primary"
+        (click)="copyRequested.emit()"
+      >
+        <app-icon name="copy" class="mr-2 size-5" />{{ copyLabel() }}
+      </button>
+      <button
+        type="button"
+        aria-label="Compartir resultado"
+        class="min-h-12 rounded-xl border border-primary/30 bg-white px-4 font-bold text-primary"
+        (click)="shareRequested.emit()"
+      >
+        <app-icon name="share" class="size-5" />
+      </button>
+    </div>
+  </ng-template>
+</aside>

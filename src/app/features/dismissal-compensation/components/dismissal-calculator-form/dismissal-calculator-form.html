@@ -1,0 +1,272 @@
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="rounded-card border border-border bg-white p-5 shadow-soft sm:p-7"
+  novalidate
+>
+  <h2 class="font-display text-2xl font-bold text-ink">Datos laborales</h2>
+
+  <section class="mt-6 border-t border-border pt-6">
+    <p class="text-sm font-bold uppercase tracking-widest text-primary">Período de trabajo</p>
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <div>
+        <label for="dismissal-start-date" class="font-bold text-ink">Fecha de ingreso</label>
+        <app-date-picker
+          inputId="dismissal-start-date"
+          formControlName="startDate"
+          [invalid]="hasError('startDate')"
+          describedBy="dismissal-start-error"
+        />
+        @if (hasError('startDate')) {
+          <p id="dismissal-start-error" class="mt-2 text-sm text-red-700">
+            Elegí la fecha de ingreso.
+          </p>
+        }
+      </div>
+      <div>
+        <label for="dismissal-end-date" class="font-bold text-ink">Fecha de despido</label>
+        <app-date-picker
+          inputId="dismissal-end-date"
+          formControlName="dismissalDate"
+          [invalid]="hasError('dismissalDate')"
+          describedBy="dismissal-end-error"
+        />
+        @if (hasError('dismissalDate')) {
+          <p id="dismissal-end-error" class="mt-2 text-sm text-red-700">
+            Elegí la fecha de despido.
+          </p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="mt-7 border-t border-border pt-6">
+    <p class="text-sm font-bold uppercase tracking-widest text-primary">Remuneración</p>
+    <div class="mt-4">
+      <label for="dismissal-article245-base" class="font-bold text-ink">
+        Mejor remuneración mensual, normal y habitual computable
+      </label>
+      <div class="relative mt-2">
+        <span
+          class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 font-bold text-primary"
+          >$</span
+        >
+        <app-money-input
+          inputId="dismissal-article245-base"
+          formControlName="article245Base"
+          [invalid]="hasError('article245Base')"
+          describedBy="dismissal-article245-help dismissal-article245-error"
+          placeholder="Ej.: 2.000.000"
+        />
+      </div>
+      <p id="dismissal-article245-help" class="mt-2 text-sm leading-6 text-muted">
+        Sin SAC, vacaciones ni premios no mensuales. Si tenés horas extra, comisiones o premios
+        mensuales, revisá la metodología porque puede corresponder un promedio específico.
+      </p>
+      @if (hasError('article245Base')) {
+        <p id="dismissal-article245-error" class="mt-2 text-sm text-red-700">
+          Ingresá una remuneración mayor a cero.
+        </p>
+      }
+    </div>
+
+    <details class="mt-4 rounded-xl border border-border bg-surface-muted p-4">
+      <summary class="cursor-pointer font-bold text-primary">
+        Horas extra, comisiones y variables
+      </summary>
+      <p class="mt-3 text-sm leading-6 text-muted">
+        La LCT vigente define habitualidad y normalidad para conceptos variables. Esta V1 no hace un
+        promedio parcial: pedí el valor computable ya revisado para evitar una estimación engañosa.
+      </p>
+    </details>
+
+    <div class="mt-5">
+      <button
+        type="button"
+        class="inline-flex min-h-11 items-center gap-2 font-bold text-primary"
+        [attr.aria-pressed]="form.controls.useSameSalaryForNotice.value"
+        (click)="toggleSameSalary()"
+      >
+        <span
+          class="flex size-5 items-center justify-center rounded border border-primary"
+          [class.bg-primary]="form.controls.useSameSalaryForNotice.value"
+          [class.text-white]="form.controls.useSameSalaryForNotice.value"
+          ><app-icon name="check" class="size-4"
+        /></span>
+        Usar la misma remuneración para preaviso
+      </button>
+    </div>
+
+    @if (!form.controls.useSameSalaryForNotice.value) {
+      <div class="mt-4">
+        <label for="dismissal-current-salary" class="font-bold text-ink">
+          Remuneración mensual actual para preaviso
+        </label>
+        <div class="relative mt-2">
+          <span
+            class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 font-bold text-primary"
+            >$</span
+          >
+          <app-money-input
+            inputId="dismissal-current-salary"
+            formControlName="currentMonthlySalary"
+            [invalid]="hasError('currentMonthlySalary')"
+            describedBy="dismissal-current-error"
+            placeholder="Ej.: 1.800.000"
+          />
+        </div>
+        @if (hasError('currentMonthlySalary')) {
+          <p id="dismissal-current-error" class="mt-2 text-sm text-red-700">
+            Ingresá una remuneración mensual actual mayor a cero.
+          </p>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="mt-7 border-t border-border pt-6">
+    <p class="text-sm font-bold uppercase tracking-widest text-primary">Condiciones del despido</p>
+
+    <fieldset class="mt-4">
+      <legend class="font-bold text-ink">¿Estabas dentro del período de prueba?</legend>
+      <div class="mt-3 grid gap-3 sm:grid-cols-3">
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.trialPeriodStatus.value === 'no'"
+          [class.bg-primary-pale]="form.controls.trialPeriodStatus.value === 'no'"
+          (click)="setChoice('trialPeriodStatus', 'no')"
+        >
+          No
+        </button>
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.trialPeriodStatus.value === 'yes'"
+          [class.bg-primary-pale]="form.controls.trialPeriodStatus.value === 'yes'"
+          (click)="setChoice('trialPeriodStatus', 'yes')"
+        >
+          Sí
+        </button>
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.trialPeriodStatus.value === 'unknown'"
+          [class.bg-primary-pale]="form.controls.trialPeriodStatus.value === 'unknown'"
+          (click)="setChoice('trialPeriodStatus', 'unknown')"
+        >
+          No sé
+        </button>
+      </div>
+    </fieldset>
+
+    <fieldset class="mt-5">
+      <legend class="font-bold text-ink">¿Te otorgaron el preaviso correspondiente?</legend>
+      <div class="mt-3 grid gap-3 sm:grid-cols-3">
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.noticeStatus.value === 'yes'"
+          [class.bg-primary-pale]="form.controls.noticeStatus.value === 'yes'"
+          (click)="setChoice('noticeStatus', 'yes')"
+        >
+          Sí
+        </button>
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.noticeStatus.value === 'no'"
+          [class.bg-primary-pale]="form.controls.noticeStatus.value === 'no'"
+          (click)="setChoice('noticeStatus', 'no')"
+        >
+          No
+        </button>
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.noticeStatus.value === 'unknown'"
+          [class.bg-primary-pale]="form.controls.noticeStatus.value === 'unknown'"
+          (click)="setChoice('noticeStatus', 'unknown')"
+        >
+          No sé
+        </button>
+      </div>
+    </fieldset>
+
+    <fieldset class="mt-5">
+      <legend class="font-bold text-ink">¿Tu convenio usa fondo o sistema de cese laboral?</legend>
+      <div class="mt-3 grid gap-3 sm:grid-cols-3">
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.terminationFundStatus.value === 'no'"
+          [class.bg-primary-pale]="form.controls.terminationFundStatus.value === 'no'"
+          (click)="setChoice('terminationFundStatus', 'no')"
+        >
+          No
+        </button>
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.terminationFundStatus.value === 'yes'"
+          [class.bg-primary-pale]="form.controls.terminationFundStatus.value === 'yes'"
+          (click)="setChoice('terminationFundStatus', 'yes')"
+        >
+          Sí
+        </button>
+        <button
+          type="button"
+          class="min-h-14 rounded-xl border px-4 font-semibold"
+          [class.border-primary]="form.controls.terminationFundStatus.value === 'unknown'"
+          [class.bg-primary-pale]="form.controls.terminationFundStatus.value === 'unknown'"
+          (click)="setChoice('terminationFundStatus', 'unknown')"
+        >
+          No sé
+        </button>
+      </div>
+    </fieldset>
+  </section>
+
+  <section class="mt-7 border-t border-border pt-6">
+    <label for="dismissal-cct-cap" class="font-bold text-ink">
+      Tope indemnizatorio de tu convenio (opcional)
+    </label>
+    <div class="relative mt-2">
+      <span
+        class="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 font-bold text-primary"
+        >$</span
+      >
+      <app-money-input
+        inputId="dismissal-cct-cap"
+        formControlName="cctCap"
+        [invalid]="hasError('cctCap')"
+        describedBy="dismissal-cct-help dismissal-cct-error"
+        placeholder="Dejalo vacío si no lo conocés"
+      />
+    </div>
+    <p id="dismissal-cct-help" class="mt-2 text-sm leading-6 text-muted">
+      Si queda vacío, no se aplica tope. No existe un único tope nacional.
+    </p>
+    @if (hasError('cctCap')) {
+      <p id="dismissal-cct-error" class="mt-2 text-sm text-red-700">
+        El tope debe ser mayor a cero o quedar vacío.
+      </p>
+    }
+  </section>
+
+  <div class="mt-7 grid gap-3 sm:grid-cols-[1fr_auto]">
+    <button
+      type="submit"
+      class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-bold text-white hover:bg-primary-hover"
+    >
+      <app-icon name="calculator" />Calcular indemnización
+    </button>
+    <button
+      type="button"
+      class="min-h-14 rounded-xl border-2 border-primary px-6 font-bold text-primary hover:bg-primary-pale"
+      (click)="reset()"
+    >
+      Limpiar
+    </button>
+  </div>
+</form>
