@@ -14,7 +14,10 @@
     "data:salary:build": "node scripts/update-salary-parameters.mjs",
     "data:salary:validate": "node scripts/validate-salary-parameters.mjs",
     "data:salary:status": "node scripts/validate-salary-parameters.mjs --status",
-    "data:validate": "npm run data:rent:validate && npm run data:salary:validate",
+    "data:monotributo:build": "node scripts/update-monotributo-parameters.mjs",
+    "data:monotributo:validate": "node scripts/validate-monotributo-parameters.mjs",
+    "data:monotributo:status": "node scripts/validate-monotributo-parameters.mjs --status",
+    "data:validate": "npm run data:rent:validate && npm run data:salary:validate && npm run data:monotributo:validate",
     "validate:dist": "node scripts/validate-dist.mjs",
     "serve:ssr:haceNumeros": "node dist/haceNumeros/server/server.mjs",
     "prod": "ng build --configuration production"

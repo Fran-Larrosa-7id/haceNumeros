@@ -1,0 +1,200 @@
+<main id="contenido" class="pb-20">
+  <div class="mx-auto max-w-site px-4 pb-10 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+    <nav aria-label="Migas de pan" class="flex flex-wrap items-center gap-2 text-sm text-muted">
+      <a routerLink="/" class="hover:text-primary">Inicio</a
+      ><app-icon name="chevron" class="size-4 text-subtle" /><span>Impuestos y emprendimientos</span
+      ><app-icon name="chevron" class="size-4 text-subtle" /><span
+        aria-current="page"
+        class="font-semibold text-ink"
+        >Monotributo</span
+      >
+    </nav>
+    <div class="mt-9 max-w-4xl">
+      <div class="flex flex-wrap gap-2">
+        <span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+          >Argentina</span
+        ><span class="rounded-full bg-primary-pale px-3 py-1 text-xs font-bold text-primary"
+          >ARCA</span
+        ><span class="rounded-full bg-primary px-3 py-1 text-xs font-bold text-white"
+          >Vigente desde {{ date(dataset.effectiveFrom) }}</span
+        >
+      </div>
+      <h1
+        class="mt-5 font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl lg:text-5xl"
+      >
+        Calculadora de Monotributo en Argentina
+      </h1>
+      <p class="mt-4 max-w-3xl text-lg leading-8 text-muted">
+        Estimá tu categoría y la cuota mensual según tus ingresos brutos, actividad y parámetros
+        físicos aplicables.
+      </p>
+    </div>
+    <aside
+      class="mt-7 flex items-start gap-3 rounded-xl border border-primary/20 bg-primary-pale p-4"
+    >
+      <app-icon name="info" class="mt-0.5 shrink-0 text-primary" />
+      <p class="text-sm leading-6 text-muted">
+        Estimación orientativa con valores de ARCA. No reemplaza tu inscripción, recategorización ni
+        la revisión de situaciones especiales. Datos revisados: {{ date(dataset.reviewedAt) }}.
+      </p>
+    </aside>
+  </div>
+  <section
+    aria-label="Calculadora y resultado"
+    class="mx-auto grid max-w-site gap-6 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8 lg:px-8"
+  >
+    <div class="lg:col-span-7">
+      <app-monotributo-calculator-form
+        (calculateRequested)="calculate($event)"
+        (invalidSubmitted)="showInvalidState()"
+        (cleared)="clearResult()"
+      />
+    </div>
+    <div class="lg:col-span-5">
+      <app-monotributo-calculation-result
+        [state]="calculationState()"
+        [copyFeedback]="copyFeedback()"
+        (copyRequested)="copyResult()"
+        (shareRequested)="shareResult()"
+      />
+    </div>
+  </section>
+  <section class="mx-auto mt-12 max-w-site px-4 sm:px-6 lg:px-8">
+    <h2 class="font-display text-2xl font-bold text-ink">Categorías de Monotributo vigentes</h2>
+    <p class="mt-2 text-muted">La tabla y la calculadora utilizan el mismo dataset versionado.</p>
+    <div class="mt-5 overflow-x-auto rounded-card border border-border bg-white shadow-soft">
+      <table class="min-w-full text-left text-sm">
+        <caption class="sr-only">
+          Límites de ingresos y cuotas mensuales por categoría de Monotributo
+        </caption>
+        <thead class="bg-surface-muted text-ink">
+          <tr>
+            <th scope="col" class="px-4 py-3 font-bold">Categoría</th>
+            <th scope="col" class="px-4 py-3 font-bold">Ingresos máximos</th>
+            <th scope="col" class="px-4 py-3 font-bold">Total servicios</th>
+            <th scope="col" class="px-4 py-3 font-bold">Total venta</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (category of dataset.categories; track category.code) {
+            <tr class="border-t border-border">
+              <th scope="row" class="px-4 py-3 font-bold text-primary">{{ category.code }}</th>
+              <td class="px-4 py-3">
+                {{ money(category.limits.annualGrossIncome) }}
+              </td>
+              <td class="px-4 py-3">
+                {{ money(category.total.services) }}
+              </td>
+              <td class="px-4 py-3">
+                {{ money(category.total.goods) }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="mx-auto mt-12 max-w-site space-y-10 px-4 sm:px-6 lg:px-8">
+    <section class="grid gap-5 md:grid-cols-2">
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Cómo se determina la categoría?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Se busca la primera categoría compatible para cada parámetro aplicable y se toma la más
+          alta. En modo rápido se consideran solo ingresos; la evaluación completa agrega local,
+          energía, alquiler y precio unitario de productos.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Cuánto se paga por mes?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          Para trabajadores independientes, la estimación suma impuesto integrado, SIPA y obra
+          social individual. En relación de dependencia se muestra solo el impuesto integrado.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">¿Qué pasa si no tengo local?</h2>
+        <p class="mt-3 leading-7 text-muted">
+          No se consideran superficie, energía ni alquiler. No se cargan como cero: simplemente no
+          son parámetros aplicables para la evaluación.
+        </p>
+      </article>
+      <article class="rounded-card border border-border bg-white p-6 shadow-soft">
+        <h2 class="font-display text-2xl font-bold text-ink">Recategorización</h2>
+        <p class="mt-3 leading-7 text-muted">
+          ARCA informa períodos de recategorización en febrero y agosto, sobre los últimos 12 meses.
+          Quienes tienen menos de seis meses de actividad no deben recategorizarse.
+        </p>
+      </article>
+    </section>
+    <section
+      id="metodologia"
+      class="scroll-mt-24 rounded-card border border-border bg-white p-6 shadow-soft sm:p-8"
+    >
+      <h2 class="font-display text-2xl font-bold text-ink">Metodología y fuentes oficiales</h2>
+      <p class="mt-4 leading-7 text-muted">
+        Los parámetros se guardan localmente para que el cálculo no haga consultas a ARCA durante su
+        uso. Se revisan cuando ARCA actualiza sus valores, habitualmente en febrero y agosto.
+      </p>
+      <p class="mt-3 text-sm text-muted">
+        Valores vigentes desde {{ date(dataset.effectiveFrom) }}. Datos revisados
+        {{ date(dataset.reviewedAt) }}.
+      </p>
+      <ul class="mt-5 grid gap-3 sm:grid-cols-2">
+        @for (source of sources; track source.url) {
+          <li>
+            <a
+              [href]="source.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-bold text-primary hover:underline"
+              >{{ source.name }}</a
+            >
+          </li>
+        }
+      </ul>
+    </section>
+    <section class="mx-auto w-full max-w-3xl">
+      <div class="text-center">
+        <p class="text-sm font-bold uppercase tracking-widest text-primary">Información útil</p>
+        <h2 class="mt-3 font-display text-3xl font-bold text-ink">Preguntas frecuentes</h2>
+      </div>
+      <div class="mt-8 space-y-3">
+        @for (faq of faqs; track faq.question) {
+          <details class="group rounded-xl border border-border bg-white shadow-soft">
+            <summary
+              class="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 p-5 font-display font-bold text-ink [&::-webkit-details-marker]:hidden"
+            >
+              {{ faq.question
+              }}<app-icon
+                name="chevron"
+                class="size-5 rotate-90 text-primary transition-transform group-open:-rotate-90"
+              />
+            </summary>
+            <p class="px-5 pb-5 leading-7 text-muted">{{ faq.answer }}</p>
+          </details>
+        }
+      </div>
+    </section>
+    <section>
+      <h2 class="font-display text-2xl font-bold text-ink">Herramientas relacionadas</h2>
+      <div class="mt-5 grid gap-4 sm:grid-cols-3">
+        <a
+          routerLink="/calculadora-sueldo-bruto-neto"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Sueldo bruto a neto</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        ><a
+          routerLink="/calculadora-aguinaldo"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Aguinaldo</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        ><a
+          routerLink="/calculadora-aumento-alquiler"
+          class="rounded-card border border-border bg-white p-5 shadow-soft hover:border-primary"
+          ><h3 class="font-display font-bold text-ink">Aumento de alquiler</h3>
+          <p class="mt-2 text-sm text-primary">Abrir calculadora →</p></a
+        >
+      </div>
+    </section>
+  </div>
+</main>

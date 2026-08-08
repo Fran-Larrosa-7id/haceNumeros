@@ -77,6 +77,14 @@ export class HomePage {
       route: '/calculadora-aguinaldo',
     },
     {
+      title: 'Calculadora de Monotributo',
+      description:
+        'Estimá tu categoría, límites y cuota mensual según los parámetros vigentes de ARCA.',
+      category: 'Impuestos y emprendimientos',
+      icon: 'receipt',
+      route: '/calculadora-monotributo',
+    },
+    {
       title: 'Comisiones de Mercado Libre',
       description:
         'Calculá cargos de venta y el importe estimado que recibirías por una operación.',
@@ -198,6 +206,7 @@ export class HomePage {
     if (tool === 'Sueldo bruto a neto') return '/calculadora-sueldo-bruto-neto';
     if (tool === 'Aguinaldo') return '/calculadora-aguinaldo';
     if (tool === 'Indemnización por despido') return '/calculadora-indemnizacion-despido';
+    if (tool === 'Monotributo') return '/calculadora-monotributo';
     return null;
   }
 

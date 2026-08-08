@@ -35,6 +35,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'calculadora-monotributo',
+    loadComponent: () =>
+      import('./features/monotributo/pages/monotributo-calculator-page/monotributo-calculator-page').then(
+        (component) => component.MonotributoCalculatorPage,
+      ),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found-page').then((component) => component.NotFoundPage),

@@ -1,0 +1,153 @@
+<aside
+  class="h-full rounded-card border border-primary/30 bg-primary p-5 text-white shadow-soft sm:p-7"
+  aria-labelledby="monotributo-result-title"
+  aria-live="polite"
+>
+  <p class="text-xs font-bold uppercase tracking-widest text-cyan-100">Tu estimación</p>
+  <h2 id="monotributo-result-title" class="mt-2 font-display text-2xl font-bold">
+    Categoría y cuota
+  </h2>
+  @switch (state().status) {
+    @case ('idle') {
+      <div class="flex min-h-80 flex-col items-center justify-center text-center">
+        <span class="flex size-16 items-center justify-center rounded-2xl bg-white text-primary"
+          ><app-icon name="receipt" class="size-8"
+        /></span>
+        <p class="mt-5 max-w-sm font-display text-xl font-bold">
+          Completá tus datos para ver la estimación.
+        </p>
+        <p class="mt-3 max-w-sm text-sm leading-6 text-cyan-50">
+          La categoría se calcula con los parámetros que indiques.
+        </p>
+      </div>
+    }
+    @case ('invalid') {
+      <div class="mt-6 rounded-xl bg-white p-5 text-ink">
+        <p class="font-bold text-red-800">Revisá los datos ingresados</p>
+        <p class="mt-2 text-sm text-muted">
+          Completá los campos necesarios para la evaluación elegida.
+        </p>
+      </div>
+    }
+    @case ('out-of-regime') {
+      @if (state().result; as result) {
+        <div class="mt-6 rounded-xl bg-white p-5 text-ink">
+          <p class="font-display text-2xl font-bold">Fuera de la estimación</p>
+          <p class="mt-3 leading-6 text-muted">
+            Supera al menos un parámetro máximo del Monotributo. No significa automáticamente que
+            seas Responsable Inscripto.
+          </p>
+          <ul class="mt-4 list-disc pl-5 text-sm text-muted">
+            @for (parameter of result.exceededParameters; track parameter) {
+              <li>{{ parameterName(parameter) }}</li>
+            }
+          </ul>
+        </div>
+      }
+    }
+    @case ('quick-estimate') {
+      @if (state().result; as result) {
+        <ng-container
+          [ngTemplateOutlet]="estimate"
+          [ngTemplateOutletContext]="{ result: result, quick: true }"
+        />
+      }
+    }
+    @case ('complete-estimate') {
+      @if (state().result; as result) {
+        <ng-container
+          [ngTemplateOutlet]="estimate"
+          [ngTemplateOutletContext]="{ result: result, quick: false }"
+        />
+      }
+    }
+    @case ('unsupported-contribution-situation') {
+      @if (state().result; as result) {
+        <ng-container
+          [ngTemplateOutlet]="estimate"
+          [ngTemplateOutletContext]="{ result: result, quick: false }"
+        />
+      }
+    }
+  }
+  <ng-template #estimate let-result="result" let-quick="quick">
+    <div class="mt-7 rounded-xl bg-white p-5 text-ink">
+      <p class="text-sm font-bold uppercase tracking-widest text-primary">Categoría estimada</p>
+      <p class="mt-2 font-display text-5xl font-extrabold text-primary">
+        {{ result.category.code }}
+      </p>
+      <p class="mt-3 text-sm leading-6 text-muted">
+        Determinada por:
+        <strong class="text-ink">{{ parameterName(result.determiningParameter) }}</strong>
+      </p>
+      @if (quick) {
+        <p class="mt-3 text-sm leading-6 text-muted">
+          La estimación rápida usa únicamente ingresos. Otros parámetros aplicables pueden exigir
+          una categoría mayor.
+        </p>
+      }
+    </div>
+    @if (result.contribution; as contribution) {
+      <div class="mt-5">
+        <p class="text-sm font-bold uppercase tracking-widest text-cyan-100">
+          Cuota mensual estimada
+        </p>
+        <p class="mt-2 font-display text-4xl font-extrabold">{{ money(contribution.total) }}</p>
+        <dl class="mt-5 border-t border-white/25 pt-4 text-sm">
+          <div class="flex justify-between gap-4 py-2">
+            <dt>Impuesto integrado</dt>
+            <dd class="font-bold">{{ money(contribution.integratedTax) }}</dd>
+          </div>
+          <div class="flex justify-between gap-4 py-2">
+            <dt>SIPA</dt>
+            <dd class="font-bold">
+              {{ contribution.sipa === null ? 'No corresponde' : money(contribution.sipa) }}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-4 py-2">
+            <dt>Obra social individual</dt>
+            <dd class="font-bold">
+              {{
+                contribution.healthInsurance === null
+                  ? 'No corresponde'
+                  : money(contribution.healthInsurance)
+              }}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    } @else {
+      <div class="mt-5 rounded-xl bg-white/10 p-4 text-sm leading-6 text-cyan-50">
+        Tu situación previsional puede modificar SIPA y obra social. La categoría estimada sigue
+        siendo útil, pero la cuota debe revisarse según tu caso en ARCA.
+      </div>
+    }
+    <div class="mt-5 rounded-xl bg-white/10 p-4 text-sm leading-6 text-cyan-50">
+      <p>
+        Margen hasta el tope de ingresos de la categoría:
+        <strong>{{ money(result.incomeMargin) }}</strong
+        >.
+      </p>
+      <p class="mt-1">
+        Usás {{ result.incomeUsage * 100 | number: '1.0-1' }} % de ese límite. Otros parámetros
+        también pueden definir la permanencia.
+      </p>
+    </div>
+    <div class="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
+      <button
+        type="button"
+        class="min-h-12 rounded-xl border border-white/40 bg-white px-4 font-bold text-primary"
+        (click)="copyRequested.emit()"
+      >
+        <app-icon name="copy" class="mr-2 size-5" />{{ copyLabel() }}</button
+      ><button
+        type="button"
+        aria-label="Compartir resultado"
+        class="min-h-12 rounded-xl border border-white/40 bg-white px-4 text-primary"
+        (click)="shareRequested.emit()"
+      >
+        <app-icon name="share" class="size-5" />
+      </button>
+    </div>
+  </ng-template>
+</aside>

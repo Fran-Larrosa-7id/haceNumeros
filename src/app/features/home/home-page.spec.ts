@@ -68,6 +68,11 @@ describe('HomePage SEO', () => {
         (link) => link.getAttribute('href') === '/calculadora-aguinaldo',
       ),
     ).toBe(true);
+    expect(
+      Array.from(body.querySelectorAll<HTMLAnchorElement>('a')).some(
+        (link) => link.getAttribute('href') === '/calculadora-monotributo',
+      ),
+    ).toBe(true);
   });
 
   function metaContent(name: string): string | null {
