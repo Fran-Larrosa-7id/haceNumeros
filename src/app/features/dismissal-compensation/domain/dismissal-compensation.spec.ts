@@ -27,7 +27,12 @@ describe('dismissal compensation calculation', () => {
   it('applies CCT cap and 67 percent floor', () => {
     expect(calculateArticle245Base(2_000_000, 3_000_000).appliedBase).toBe(2_000_000);
     expect(calculateArticle245Base(2_000_000, 1_600_000).appliedBase).toBe(1_600_000);
-    expect(calculateArticle245Base(2_000_000, 1_000_000).appliedBase).toBe(1_340_000);
+    expect(calculateArticle245Base(2_000_000, 1_000_000)).toMatchObject({
+      rawBase: 2_000_000,
+      cctCap: 1_000_000,
+      floor67: 1_340_000,
+      appliedBase: 1_340_000,
+    });
   });
 
   it('calculates a complete case without month integration on the last day', () => {
