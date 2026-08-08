@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const browserRoot = path.join(projectRoot, 'dist', 'haceNumeros', 'browser');
 const siteOrigin = 'https://hacenumeros.com';
+const ADSENSE_CLIENT = 'ca-pub-9581379357465685';
 const indexableUrls = [
   `${siteOrigin}/`,
   `${siteOrigin}/calculadora-aumento-alquiler`,
@@ -86,6 +87,17 @@ try {
     monotributoCalculator.html,
     privacy.html,
   );
+  for (const [name, html] of [
+    ['home', home.html],
+    ['alquiler', calculator.html],
+    ['sueldo', salaryCalculator.html],
+    ['aguinaldo', sacCalculator.html],
+    ['indemnización', dismissalCalculator.html],
+    ['monotributo', monotributoCalculator.html],
+    ['privacidad', privacy.html],
+  ]) {
+    validateAdSenseHead(name, html);
+  }
   if (
     new Set([
       home.title,
@@ -135,10 +147,8 @@ try {
     if (/\b(?:ca-)?pub-0{16}\b/i.test(content)) {
       throw new Error(`${path.relative(browserRoot, file)} contiene un Publisher ID ficticio.`);
     }
-    if (/pagead2\.googlesyndication\.com/i.test(content)) {
-      throw new Error(
-        `${path.relative(browserRoot, file)} carga AdSense antes de estar habilitado.`,
-      );
+    if (/<ins\b[^>]*\badsbygoogle\b|adsbygoogle\.push/i.test(content)) {
+      throw new Error(`${path.relative(browserRoot, file)} contiene una unidad manual de AdSense.`);
     }
   }
 
@@ -234,6 +244,23 @@ function validateNoindexPage(relativePath, canonical) {
       throw new Error(`${relativePath}: falta contenido esencial de privacidad.`);
   }
   return { html };
+}
+
+function validateAdSenseHead(pageName, html) {
+  const head = /<head\b[^>]*>([\s\S]*?)<\/head>/i.exec(html)?.[1] ?? '';
+  const exactScript = new RegExp(
+    `<script\\b(?=[^>]*\\bsrc=["']https://pagead2\\.googlesyndication\\.com/pagead/js/adsbygoogle\\.js\\?client=${ADSENSE_CLIENT}["'])(?=[^>]*\\bcrossorigin=["']anonymous["'])[^>]*\\basync(?:\\s|=|>)[^>]*><\\/script>`,
+    'gi',
+  );
+  const headMatches = [...head.matchAll(exactScript)];
+  const allPageadReferences = html.match(/pagead2\.googlesyndication\.com/gi) ?? [];
+  const clients = html.match(/ca-pub-[0-9]+/gi) ?? [];
+  if (headMatches.length !== 1 || allPageadReferences.length !== 1) {
+    throw new Error(`${pageName}: el snippet de AdSense debe existir exactamente una vez en head.`);
+  }
+  if (clients.length !== 1 || clients[0] !== ADSENSE_CLIENT) {
+    throw new Error(`${pageName}: el client de AdSense es incorrecto.`);
+  }
 }
 
 function validateSitemap() {

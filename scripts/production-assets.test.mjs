@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 
 const root = process.cwd();
+const adsenseClient = 'ca-pub-9581379357465685';
 
 test('production domain and crawler assets are coherent', async () => {
   const [cname, robots, sitemap, index, notFound] = await Promise.all([
@@ -29,6 +30,14 @@ test('production domain and crawler assets are coherent', async () => {
   assert.match(index, /<html lang="es">/);
   assert.match(index, /<base href="\/"\s*\/>/);
   assert.doesNotMatch(index, /\/haceNumeros\//);
+  const head = /<head\b[^>]*>([\s\S]*?)<\/head>/i.exec(index)?.[1] ?? '';
+  assert.equal((head.match(/pagead2\.googlesyndication\.com/gi) ?? []).length, 1);
+  assert.match(
+    head,
+    new RegExp(
+      `src="https://pagead2\\.googlesyndication\\.com/pagead/js/adsbygoogle\\.js\\?client=${adsenseClient}"`,
+    ),
+  );
   assert.match(notFound, /<meta name="robots" content="noindex,follow"\s*\/>/);
   assert.doesNotMatch(notFound, /rel="canonical"/);
   assert.doesNotMatch(sitemap, /404|data\/rent-indexes|github\.io|\/haceNumeros\//i);
@@ -51,13 +60,15 @@ test('public assets do not expose source spreadsheets', async () => {
 });
 
 test('application sources contain no legacy public domain or empty links', async () => {
-  const files = (await listFiles(join(root, 'src'))).filter((file) => /\.(?:html|ts)$/.test(file));
+  const files = (await listFiles(join(root, 'src'))).filter(
+    (file) => /\.(?:html|ts)$/.test(file) && file !== join(root, 'src', 'index.html'),
+  );
   const source = (await Promise.all(files.map((file) => readFile(file, 'utf8')))).join('\n');
 
   assert.doesNotMatch(source, /github\.io/i);
   assert.doesNotMatch(source, /href=["']#["']/i);
   assert.doesNotMatch(source, /\b(?:ca-)?pub-0{16}\b/i);
-  assert.doesNotMatch(source, /pagead2\.googlesyndication\.com/i);
+  assert.doesNotMatch(source, /<ins\b[^>]*\badsbygoogle\b|adsbygoogle\.push/i);
   assert.equal(
     (await listFiles(join(root, 'public'))).some((file) => file.endsWith('ads.txt')),
     false,
