@@ -47,6 +47,10 @@ try {
     'BreadcrumbList',
     /monotributo/i,
   );
+  const privacy = validateNoindexPage(
+    path.join('privacidad', 'index.html'),
+    `${siteOrigin}/privacidad`,
+  );
 
   for (const file of [
     'CNAME',
@@ -80,6 +84,7 @@ try {
     sacCalculator.html,
     dismissalCalculator.html,
     monotributoCalculator.html,
+    privacy.html,
   );
   if (
     new Set([
@@ -103,6 +108,9 @@ try {
   }
 
   const files = walk(browserRoot);
+  if (files.some((file) => path.basename(file) === 'ads.txt')) {
+    throw new Error('No debe publicarse ads.txt antes de tener la línea real de AdSense.');
+  }
   const privateSource = files.find((file) => /\.(?:xls|xlsx|csv|pdf)$/i.test(file));
   if (privateSource) {
     throw new Error(
@@ -123,6 +131,14 @@ try {
     }
     if (/\/haceNumeros\//i.test(content)) {
       throw new Error(`${path.relative(browserRoot, file)} contiene el base path anterior.`);
+    }
+    if (/\b(?:ca-)?pub-0{16}\b/i.test(content)) {
+      throw new Error(`${path.relative(browserRoot, file)} contiene un Publisher ID ficticio.`);
+    }
+    if (/pagead2\.googlesyndication\.com/i.test(content)) {
+      throw new Error(
+        `${path.relative(browserRoot, file)} carga AdSense antes de estar habilitado.`,
+      );
     }
   }
 
@@ -192,6 +208,34 @@ function validatePage(relativePath, canonical, structuredType, expectedConcept) 
   return { html, title, description: description.content };
 }
 
+function validateNoindexPage(relativePath, canonical) {
+  const filePath = path.join(browserRoot, relativePath);
+  assertFile(filePath);
+  const html = fs.readFileSync(filePath, 'utf8');
+  const title = /<title>([^<]+)<\/title>/i.exec(html)?.[1]?.trim();
+  const description = findTag(html, 'meta', { name: 'description' });
+  const robots = findTag(html, 'meta', { name: 'robots' });
+  const canonicalTag = findTag(html, 'link', { rel: 'canonical' });
+  const h1 = /<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(html)?.[1]?.replace(/<[^>]+>/g, ' ');
+  if (title !== 'Política de privacidad | Hacé Números') {
+    throw new Error(`${relativePath}: title incorrecto.`);
+  }
+  if (!description?.content?.trim() || robots?.content !== 'noindex,follow') {
+    throw new Error(`${relativePath}: metadata de privacidad incorrecta.`);
+  }
+  if (canonicalTag?.href !== canonical || !/privacidad/i.test(h1 ?? '')) {
+    throw new Error(`${relativePath}: canonical o H1 incorrecto.`);
+  }
+  if ((html.match(/<h1\b/gi) ?? []).length !== 1) {
+    throw new Error(`${relativePath}: debe contener exactamente un H1.`);
+  }
+  for (const concept of [/cookies/i, /publicidad/i, /google/i]) {
+    if (!concept.test(html))
+      throw new Error(`${relativePath}: falta contenido esencial de privacidad.`);
+  }
+  return { html };
+}
+
 function validateSitemap() {
   const sitemap = fs.readFileSync(path.join(browserRoot, 'sitemap.xml'), 'utf8');
   const simpleSitemapPattern =
@@ -248,6 +292,7 @@ function validateInternalNavigation(
   sacHtml,
   dismissalHtml,
   monotributoHtml,
+  privacyHtml,
 ) {
   if (!findTag(homeHtml, 'a', { href: '/calculadora-aumento-alquiler' })) {
     throw new Error('La home no enlaza internamente a la calculadora publicada.');
@@ -263,6 +308,9 @@ function validateInternalNavigation(
   }
   if (!findTag(homeHtml, 'a', { href: '/calculadora-monotributo' })) {
     throw new Error('La home no enlaza internamente a la calculadora de Monotributo.');
+  }
+  if (!findTag(homeHtml, 'a', { href: '/privacidad' })) {
+    throw new Error('El footer no enlaza a la política de privacidad.');
   }
   if (!findTag(calculatorHtml, 'a', { href: '/' })) {
     throw new Error('La calculadora no ofrece navegación interna hacia la home.');
@@ -310,6 +358,9 @@ function validateInternalNavigation(
   }
   if (!findTag(monotributoHtml, 'section', { id: 'metodologia' })) {
     throw new Error('La calculadora de Monotributo no contiene su metodología.');
+  }
+  if (!findTag(privacyHtml, 'a', { href: '/privacidad' })) {
+    throw new Error('La política de privacidad debe conservar el enlace permanente del footer.');
   }
 }
 

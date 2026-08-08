@@ -56,6 +56,12 @@ test('application sources contain no legacy public domain or empty links', async
 
   assert.doesNotMatch(source, /github\.io/i);
   assert.doesNotMatch(source, /href=["']#["']/i);
+  assert.doesNotMatch(source, /\b(?:ca-)?pub-0{16}\b/i);
+  assert.doesNotMatch(source, /pagead2\.googlesyndication\.com/i);
+  assert.equal(
+    (await listFiles(join(root, 'public'))).some((file) => file.endsWith('ads.txt')),
+    false,
+  );
 });
 
 async function read(relativePath) {

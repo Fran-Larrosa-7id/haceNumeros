@@ -42,6 +42,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'privacidad',
+    loadComponent: () =>
+      import('./features/privacy/privacy-page').then((component) => component.PrivacyPage),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found-page').then((component) => component.NotFoundPage),

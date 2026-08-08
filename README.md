@@ -89,6 +89,30 @@ Las frases definidas en el contenido son intenciones objetivo, no consultas que 
 posicionando. Hasta que Search Console tenga datos suficientes, no se deben inventar resultados ni
 conclusiones.
 
+## Alta de Google AdSense
+
+La preparación actual no carga AdSense, no publica `ads.txt` y no contiene un Publisher ID. Cuando
+Google entregue el Publisher ID real y/o el snippet oficial:
+
+1. Confirmar que `/privacidad` está publicada.
+2. Crear la cuenta de AdSense y añadir `hacenumeros.com`.
+3. Elegir y copiar el método de conexión entregado por Google.
+4. No inventar un Publisher ID ni reconstruir manualmente un snippet.
+5. Entregar a Codex el snippet oficial o el Publisher ID real.
+6. Insertar el snippet oficial exactamente como lo entregue AdSense dentro de `<head>` en
+   `src/index.html`.
+7. Crear `public/ads.txt` solo cuando Google entregue la línea real, con el formato
+   `google.com, pub-XXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0` y el ID real.
+8. Ejecutar `npm test`, `npm run build` y `npm run validate:dist`.
+9. Hacer deploy, verificar el sitio en AdSense y solicitar la revisión.
+10. Revisar AdSense > Privacidad y mensajes y configurar una CMP certificada por Google cuando
+    corresponda. No implementar una CMP casera.
+11. Activar anuncios reales solo después de la aprobación y configuración correspondiente.
+
+Google puede demorar algunos días en revisar un sitio y, según su documentación, en algunos casos
+entre 2 y 4 semanas. Después de crear la cuenta, el siguiente insumo necesario es el Publisher ID
+real y/o el snippet oficial de AdSense.
+
 ## Checklist al publicar una nueva calculadora
 
 1. Crear la ruta pública en `src/app/app.routes.ts`.
